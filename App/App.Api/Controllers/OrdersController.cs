@@ -1,42 +1,48 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+﻿using App.Application.DTOs;
+using App.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace App.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class OrdersController : ControllerBase
+public class OrdersController(IOrderService orderService) : ControllerBase
 {
-    // GET: api/<OrdersController>
+    private readonly IOrderService _orderService = orderService;
+
     [HttpGet]
-    public IEnumerable<string> Get()
+    public async Task<IActionResult> Get()
     {
-        return new string[] { "value1", "value2" };
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        var orders = await _orderService.GetAllByUserIdAsync(userId);
+        return Ok(orders);
     }
 
-    // GET api/<OrdersController>/5
     [HttpGet("{id}")]
-    public string Get(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        return "value";
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        var order = await _orderService.GetByIdAndUserIdAsync(id, userId);
+        if (order == null) return NotFound();
+
+        return Ok(order);
     }
 
-    // POST api/<OrdersController>
     [HttpPost]
-    public void Post([FromBody] string value)
+    public async Task<IActionResult> Post([FromBody] OrderDto orderDto)
     {
-    }
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-    // PUT api/<OrdersController>/5
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
-    {
-    }
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-    // DELETE api/<OrdersController>/5
-    [HttpDelete("{id}")]
-    public void Delete(int id)
-    {
+        orderDto.UserId = userId;
+        await _orderService.CreateAsync(orderDto);
+        return Ok(orderDto);
     }
 }

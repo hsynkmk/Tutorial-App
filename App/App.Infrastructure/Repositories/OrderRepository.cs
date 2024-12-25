@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using App.Application.Interfaces;
+using App.Domain.Entities;
+using App.Infrastructure.Persistence;
 
 namespace App.Infrastructure.Repositories;
 
-internal class OrderRepository
+internal class OrderRepository(AppDbContext context) : BaseRepository<Order>(context), IOrderRepository
 {
 }

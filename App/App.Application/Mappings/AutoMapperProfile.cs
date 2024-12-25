@@ -9,7 +9,7 @@ internal class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         // User Mapping
-        CreateMap<User, UserDto>()
+        CreateMap<ApplicationUser, UserDto>()
             .ReverseMap();
 
         // Course Mapping
@@ -21,11 +21,11 @@ internal class AutoMapperProfile : Profile
             .ReverseMap();
 
         // OrderDetail Mapping
-        //CreateMap<OrderDetail, OrderDetailDto>()
-        //    .ReverseMap();
+        CreateMap<OrderDetail, OrderDetailDto>()
+            .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Course.Name));
 
-        //// Payment Mapping
-        //CreateMap<Payment, PaymentDto>()
-        //    .ReverseMap();
+        // CartItem Mapping
+        CreateMap<CartItem, CartItemDto>()
+            .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Course.Name));
     }
 }
