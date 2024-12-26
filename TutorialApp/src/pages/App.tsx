@@ -7,6 +7,9 @@ import ProfilePage from "../pages/ProfilePage";
 import CourseDetailsPage from "../pages/CourseDetailsPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
+import ListCoursesPage from "../pages/ListCoursesPage";
+import CreateCoursePage from "../pages/CreateCoursePage";
+import UpdateCoursePage from "../pages/UpdateCoursePage";
 
 const App: React.FC = () => {
   return (
@@ -19,6 +22,12 @@ const App: React.FC = () => {
           <Route path="/courses/:id" element={<CourseDetailsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/admin/courses" element={<ListCoursesPage />} />
+          <Route path="/admin/courses/create" element={<CreateCoursePage />} />
+          <Route
+            path="/admin/courses/edit/:id"
+            element={<UpdateCoursePage />}
+          />
         </Routes>
       </div>
     </Router>
