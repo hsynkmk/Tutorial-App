@@ -23,6 +23,13 @@ export const authService = {
   updateProfile: (userData) => api.put('/users/profile', userData),
 };
 
+export const userService = {
+  getAllUsers: () => api.get('/users'),
+  getUserById: (id) => api.get(`/users/${id}`),
+  updateUserRole: (userId, role) => api.put(`/users/${userId}/role`, { role }),
+  deleteUser: (id) => api.delete(`/users/${id}`),
+};
+
 export const courseService = {
   getAllCourses: () => api.get('/courses'),
   getCourseById: (id) => api.get(`/courses/${id}`),

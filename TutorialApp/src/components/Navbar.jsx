@@ -1,9 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { useCart } from '../context/CartContext';
+import { FaUser, FaSignOutAlt, FaShoppingCart } from 'react-icons/fa';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { getCartCount } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -37,8 +39,32 @@ const Navbar = () => {
                 Courses
               </Link>
             </li>
+            {user?.role === 'Educator' && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/manage-courses">
+                    Manage Courses
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/manage-users">
+                    Manage Users
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
           <ul className="navbar-nav">
+            <li className="nav-item">
+              <Link className="nav-link position-relative" to="/cart">
+                <FaShoppingCart size={20} />
+                {getCartCount() > 0 && (
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {getCartCount()}
+                  </span>
+                )}
+              </Link>
+            </li>
             {user ? (
               <>
                 <li className="nav-item">

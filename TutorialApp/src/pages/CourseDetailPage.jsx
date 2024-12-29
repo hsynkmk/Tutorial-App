@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { courseService, orderService } from '../services/api';
+import { courseService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { toast } from 'react-toastify';
+import { FaShoppingCart } from 'react-icons/fa';
 
 const CourseDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addToCart } = useCart();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [purchasing, setPurchasing] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -29,23 +31,15 @@ const CourseDetailPage = () => {
     fetchCourse();
   }, [id]);
 
-  const handlePurchase = async () => {
+  const handleAddToCart = () => {
     if (!user) {
-      toast.info('Please log in to purchase this course');
+      toast.info('Please log in to add courses to cart');
       navigate('/login');
       return;
     }
 
-    setPurchasing(true);
-    try {
-      await orderService.purchaseCourse(id);
-      toast.success('Course purchased successfully!');
-      navigate('/profile');
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to purchase course. Please try again.');
-    } finally {
-      setPurchasing(false);
-    }
+    addToCart(course);
+    toast.success('Course added to cart!');
   };
 
   if (loading) return <LoadingSpinner />;
@@ -80,14 +74,14 @@ const CourseDetailPage = () => {
               <h5 className="card-title">Course Details</h5>
               <p className="h2 mb-4">${course.price}</p>
               <button
-                className="btn btn-primary w-100"
-                onClick={handlePurchase}
-                disabled={purchasing}
+                className="btn btn-primary w-100 mb-3"
+                onClick={handleAddToCart}
               >
-                {purchasing ? 'Processing...' : 'Purchase Course'}
+                <FaShoppingCart className="me-2" />
+                Add to Cart
               </button>
               {!user && (
-                <p className="text-muted mt-2 text-center">
+                <p className="text-muted text-center">
                   Please log in to purchase this course
                 </p>
               )}
