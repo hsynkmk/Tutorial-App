@@ -2,7 +2,6 @@ using App.Infrastructure.Extensions;
 using App.Infrastructure.Seeders;
 using App.Application.Extensions;
 using App.API.Middlewares;
-using App.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
