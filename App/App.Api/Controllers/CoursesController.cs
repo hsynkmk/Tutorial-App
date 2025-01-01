@@ -36,6 +36,7 @@ public class CoursesController(ICourseService courseService) : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, [FromBody] CourseDto courseDto)
     {
+        courseDto.Id = id;
         if (id != courseDto.Id) return BadRequest();
 
         await _courseService.UpdateAsync(courseDto);

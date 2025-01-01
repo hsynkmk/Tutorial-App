@@ -15,7 +15,7 @@ internal class OrderService(IUnitOfWork unitOfWork, IMapper mapper) : IOrderServ
 
     public async Task<IEnumerable<OrderDto>> GetAllByUserIdAsync(string userId)
     {
-        var orders = await _unitOfWork.Orders.GetAllAsync(o => o.UserId == userId, "Course");
+        var orders = await _unitOfWork.Orders.GetAllAsync(o => o.User.Id == userId, "Course");
         if (orders == null || !orders.Any()) throw new NotFoundException(Constans.Order, "all");
 
         return _mapper.Map<IEnumerable<OrderDto>>(orders);
@@ -23,7 +23,7 @@ internal class OrderService(IUnitOfWork unitOfWork, IMapper mapper) : IOrderServ
 
     public async Task<OrderDto?> GetByIdAndUserIdAsync(int id, string userId)
     {
-        var order = await _unitOfWork.Orders.GetAsync(o => o.Id == id && o.UserId == userId, "Course");
+        var order = await _unitOfWork.Orders.GetAsync(o => o.Id == id && o.User.Id == userId, "Course");
         if (order == null) throw new NotFoundException(Constans.Order, id);
 
         return _mapper.Map<OrderDto?>(order);
@@ -32,7 +32,7 @@ internal class OrderService(IUnitOfWork unitOfWork, IMapper mapper) : IOrderServ
     public async Task CreateAsync(OrderDto orderDto)
     {
         var order = _mapper.Map<Order>(orderDto);
-        order.OrderDate = DateTime.UtcNow;
+        order.PurchaseDate = DateTime.UtcNow;
 
         await _unitOfWork.Orders.AddAsync(order);
         await _unitOfWork.SaveAsync();

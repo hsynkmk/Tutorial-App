@@ -53,7 +53,8 @@ internal class CourseService(IUnitOfWork unitOfWork, IMapper mapper) : ICourseSe
         var course = await _unitOfWork.Courses.GetAsync(c => c.Id == courseDto.Id);
         if (course == null) throw new NotFoundException(Constans.Course, courseDto.Name);
 
-        course = _mapper.Map<Course>(courseDto);
+        // Map only updated properties to the tracked entity
+        _mapper.Map(courseDto, course);
 
         _unitOfWork.Courses.Update(course);
         await _unitOfWork.SaveAsync();

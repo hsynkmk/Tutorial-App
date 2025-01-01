@@ -4,6 +4,7 @@ using App.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace App.API.Controllers;
 
@@ -11,60 +12,57 @@ namespace App.API.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUserService _userService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public UsersController(UserManager<ApplicationUser> userManager, IUserService userService)
     {
-        _userManager = userManager;
         _userService = userService;
+        _userManager = userManager;
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await _userManager.FindByEmailAsync(loginDto.Email);
-        if (user == null)
-        {
-            return Unauthorized("Invalid email or password");
-        }
-        var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-        if (result)
-        {
-            return new UserDto
-            {
-                Email = user.Email,
-                Token = await _userService.GenerateToken(user)
-
-            };
-        }
-        return Unauthorized("Invalid email or password");
+        var (success, token) = await _userService.LoginAsync(loginDto.Email, loginDto.Password);
+        if (!success) return Unauthorized("Invalid email or password");
+        return Ok(new { token });
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
     {
-        var newUser = new ApplicationUser
-        {
-            UserName = registerDto.Email,
-            FullName = registerDto.Name,
-            Email = registerDto.Email
-        };
-
-        var result = await _userManager.CreateAsync(newUser, registerDto.Password);
-        
-        if (!result.Succeeded)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(error.Code, error.Description);
-            }
-            return ValidationProblem();
-        }
-
-        await _userManager.AddToRoleAsync(newUser, "Student");
-        return StatusCode(201);
+        var (success, error) = await _userService.RegisterAsync(registerDto.Name, registerDto.Email, registerDto.Password);
+        if (!success) return BadRequest(error);
+        return Ok("Registration successful");
     }
+
+    [Authorize]
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserDto updateUserDto)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var success = await _userService.UpdateProfileAsync(userId, updateUserDto.FullName, updateUserDto.CurrentPassword, updateUserDto.NewPassword);
+        if (!success) return BadRequest("Failed to update profile");
+        return Ok("Profile updated successfully");
+    }
+
+    [Authorize(Roles = "Educator")]
+    [HttpGet]
+    public async Task<ActionResult<List<ApplicationUser>>> GetAllUsers()
+    {
+        var users = await _userService.GetAllUsersAsync();
+        return Ok(users);
+    }
+
+    //[Authorize(Roles = "Educator")]
+    //[HttpPut("{userId}/role")]
+    //public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] UpdateRoleRequest request)
+    //{
+    //    var success = await _userService.UpdateUserRoleAsync(userId, request.Role);
+    //    if (!success) return BadRequest("Failed to update user role");
+    //    return Ok("User role updated successfully");
+    //}
 
     [Authorize]
     [HttpGet("currentUser")]

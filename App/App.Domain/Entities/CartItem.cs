@@ -1,9 +1,9 @@
-﻿namespace App.Domain.Entities;
-public class CartItem
+﻿using App.Domain.Common;
+
+namespace App.Domain.Entities;
+public class CartItem : BaseEntity
 {
     public int Id { get; set; }
-
-    public string UserId { get; set; }
 
     public ApplicationUser User { get; set; }
 
@@ -11,5 +11,4 @@ public class CartItem
 
     public Course Course { get; set; }
 
-    public DateTime AddedDate { get; set; }
 }

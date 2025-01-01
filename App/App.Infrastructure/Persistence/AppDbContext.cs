@@ -11,4 +11,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public required DbSet<OrderDetail> OrderDetails { get; set; }
     public required DbSet<CartItem> CartItems { get; set; }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // Configure Order -> ApplicationUser relationship
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.User)
+            .WithMany()
+            .OnDelete(DeleteBehavior.NoAction); // Disable cascading delete
+
+        // Configure Order -> Course relationship
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Course)
+            .WithMany()
+            .OnDelete(DeleteBehavior.NoAction); // Disable cascading delete
+    }
+
 }

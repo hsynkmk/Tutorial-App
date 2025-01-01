@@ -1,6 +1,8 @@
-﻿using App.Application.Interfaces;
+﻿using App.Application.DTOs;
+using App.Application.Interfaces;
 using App.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -25,6 +27,78 @@ internal class UserService : IUserService
         //_signInManager = signInManager;
         _configuration = configuration;
     }
+
+    public async Task<(bool success, string token)> LoginAsync(string email, string password)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null) return (false, null);
+
+        var result = await _userManager.CheckPasswordAsync(user, password);
+        if (!result) return (false, null);
+
+        await _userManager.UpdateAsync(user);
+
+        var token = await GenerateToken(user);
+        return (true, token);
+    }
+
+    public async Task<(bool success, string error)> RegisterAsync(string name, string email, string password)
+    {
+        var user = new ApplicationUser
+        {
+            UserName = email,
+            FullName = name,
+            Email = email
+        };
+
+        var result = await _userManager.CreateAsync(user, password);
+        if (!result.Succeeded)
+        {
+            return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        await _userManager.AddToRoleAsync(user, "Student");
+        return (true, null);
+    }
+
+    public async Task<bool> UpdateProfileAsync(string userId, string fullName, string currentPassword, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return false;
+
+        user.FullName = fullName;
+
+        if (!string.IsNullOrEmpty(newPassword))
+        {
+            var changePasswordResult = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (!changePasswordResult.Succeeded) return false;
+        }
+
+        var result = await _userManager.UpdateAsync(user);
+        return result.Succeeded;
+    }
+
+    //public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
+    //{
+    //    var user = await _userManager.FindByIdAsync(userId);
+    //    if (user == null) return false;
+
+    //    user.Role = newRole;
+    //    var result = await _userManager.UpdateAsync(user);
+    //    return result.Succeeded;
+    //}
+
+    public async Task<List<ApplicationUser>> GetAllUsersAsync()
+    {
+        return await _userManager.Users.ToListAsync();
+    }
+
+    public async Task<ApplicationUser> GetUserByIdAsync(string id)
+    {
+        return await _userManager.FindByIdAsync(id);
+    }
+
+
     public async Task<string> GenerateToken(ApplicationUser user)
     {
         //claims
