@@ -54,7 +54,7 @@ const ManageUsersPage = () => {
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.name}</td>
+                <td>{user.fullName}</td>
                 <td>{user.email}</td>
                 <td>
                   <span className="badge bg-primary">

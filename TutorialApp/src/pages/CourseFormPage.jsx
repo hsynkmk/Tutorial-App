@@ -12,7 +12,7 @@ const CourseFormPage = () => {
     name: '',
     description: '',
     price: '',
-    learningOutcomes: [''],
+    category: '', // Replace learningOutcomes with category
   });
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const CourseFormPage = () => {
         name: course.name,
         description: course.description,
         price: course.price.toString(),
-        learningOutcomes: course.learningOutcomes || [''],
+        category: course.category || '', // Handle category field
       });
     } catch (error) {
       toast.error('Failed to load course');
@@ -47,31 +47,6 @@ const CourseFormPage = () => {
     }));
   };
 
-  const handleOutcomeChange = (index, value) => {
-    const newOutcomes = [...formData.learningOutcomes];
-    newOutcomes[index] = value;
-    setFormData((prev) => ({
-      ...prev,
-      learningOutcomes: newOutcomes,
-    }));
-  };
-
-  const addOutcome = () => {
-    setFormData((prev) => ({
-      ...prev,
-      learningOutcomes: [...prev.learningOutcomes, ''],
-    }));
-  };
-
-  const removeOutcome = (index) => {
-    if (formData.learningOutcomes.length === 1) return;
-    const newOutcomes = formData.learningOutcomes.filter((_, i) => i !== index);
-    setFormData((prev) => ({
-      ...prev,
-      learningOutcomes: newOutcomes,
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -79,7 +54,6 @@ const CourseFormPage = () => {
     const courseData = {
       ...formData,
       price: parseFloat(formData.price),
-      learningOutcomes: formData.learningOutcomes.filter(Boolean),
     };
 
     try {
@@ -156,35 +130,18 @@ const CourseFormPage = () => {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Learning Outcomes</label>
-                  {formData.learningOutcomes.map((outcome, index) => (
-                    <div key={index} className="input-group mb-2">
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={outcome}
-                        onChange={(e) =>
-                          handleOutcomeChange(index, e.target.value)
-                        }
-                        placeholder="Enter a learning outcome"
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => removeOutcome(index)}
-                        disabled={formData.learningOutcomes.length === 1}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary"
-                    onClick={addOutcome}
-                  >
-                    Add Learning Outcome
-                  </button>
+                  <label htmlFor="category" className="form-label">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
                 <div className="d-flex gap-2">
                   <button type="submit" className="btn btn-primary">
@@ -207,4 +164,4 @@ const CourseFormPage = () => {
   );
 };
 
-export default CourseFormPage; 
+export default CourseFormPage;
