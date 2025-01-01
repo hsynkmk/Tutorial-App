@@ -14,8 +14,17 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setUser(decoded);
+
+        // Map the role to a simpler property
+        const user = {
+          email: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+          name: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+          role: decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+        };
+
+        setUser(user);
         localStorage.setItem('token', token);
+
       } catch (error) {
         console.error('Invalid token:', error);
         logout();

@@ -7,7 +7,7 @@ const SearchBar = ({ onSearch }) => {
 
   useEffect(() => {
     onSearch(query);
-  }, [query, onSearch]);
+  }, [query]);
 
   return (
     <div className="d-flex mb-4">
