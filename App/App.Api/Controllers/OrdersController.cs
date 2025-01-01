@@ -1,48 +1,102 @@
 ﻿using App.Application.DTOs;
 using App.Application.Interfaces;
+using App.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace App.API.Controllers;
+namespace App.Api.Controllers;
 
-[Route("api/[controller]")]
+[Authorize]
 [ApiController]
-public class OrdersController(IOrderService orderService) : ControllerBase
+[Route("api/[controller]")]
+public class OrdersController : ControllerBase
 {
-    private readonly IOrderService _orderService = orderService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserService _userService;
 
-    [HttpGet]
-    public async Task<IActionResult> Get()
+    public OrdersController(IUnitOfWork unitOfWork, IUserService userService)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        _unitOfWork = unitOfWork;
+        _userService = userService;
+    }
 
-        var orders = await _orderService.GetAllByUserIdAsync(userId);
+    [HttpGet("user")]
+    public async Task<ActionResult<List<Order>>> GetUserOrders()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+        {
+            return Unauthorized("User not authenticated");
+        }
+
+        var orders = await _unitOfWork.Orders.GetAllAsync(
+            o => o.User.Id == userId,
+            includeProperties: "Course,User,OrderDetails"
+        );
         return Ok(orders);
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
+    [Authorize(Roles = "Educator")]
+    [HttpGet]
+    public async Task<ActionResult<List<Order>>> GetAllOrders()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-        var order = await _orderService.GetByIdAndUserIdAsync(id, userId);
-        if (order == null) return NotFound();
-
-        return Ok(order);
+        var orders = await _unitOfWork.Orders.GetAllAsync(
+            includeProperties: "User,Course,OrderDetails"
+        );
+        return Ok(orders);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] OrderDto orderDto)
+    public async Task<ActionResult<Order>> CreateOrder([FromBody] CreateOrderRequest request)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+        if (userId == null)
+        {
+            return Unauthorized("User not authenticated");
+        }
 
-        orderDto.UserId = userId;
-        await _orderService.CreateAsync(orderDto);
-        return Ok(orderDto);
+        // Retrieve user from the database using the user service
+        var user = await _userService.GetUserByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+
+        var hasPurchased = await _unitOfWork.Orders.GetAsync(
+            o => o.User.Id == userId && o.Course.Id == request.CourseId
+        );
+
+        if (hasPurchased != null)
+        {
+            return BadRequest("You have already purchased this course");
+        }
+
+        var course = await _unitOfWork.Courses.GetAsync(c => c.Id == request.CourseId);
+        if (course == null)
+        {
+            return NotFound("Course not found");
+        }
+
+        var order = new Order
+        {
+            User = user, // Use the existing user object from the service
+            Course = course,
+            Price = course.Price,
+            TransactionId = request.TransactionId,
+            PaymentStatus = request.PaymentStatus ?? "Completed",
+            OrderDetails = request.OrderDetails?.Select(od => new OrderDetail
+            {
+
+                Price = od.Quantity
+
+            }).ToList()
+        };
+
+        await _unitOfWork.Orders.AddAsync(order);
+        await _unitOfWork.SaveAsync();
+
+        return CreatedAtAction(nameof(GetUserOrders), new { }, order);
     }
 }

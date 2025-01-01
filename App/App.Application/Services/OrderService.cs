@@ -1,40 +1,77 @@
 ﻿using App.Application.DTOs;
 using App.Application.Interfaces;
 using App.Domain.Entities;
-using App.Domain.Exceptions;
-using AutoMapper;
-using App.Domain.Common;
+using Microsoft.AspNetCore.Identity;
 
 namespace App.Application.Services;
 
-
-internal class OrderService(IUnitOfWork unitOfWork, IMapper mapper) : IOrderService
+public class OrderService : IOrderService
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    private readonly IMapper _mapper = mapper;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public async Task<IEnumerable<OrderDto>> GetAllByUserIdAsync(string userId)
+    public OrderService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
     {
-        var orders = await _unitOfWork.Orders.GetAllAsync(o => o.User.Id == userId, "Course");
-        if (orders == null || !orders.Any()) throw new NotFoundException(Constans.Order, "all");
-
-        return _mapper.Map<IEnumerable<OrderDto>>(orders);
+        _unitOfWork = unitOfWork;
+        _userManager = userManager;
     }
 
-    public async Task<OrderDto?> GetByIdAndUserIdAsync(int id, string userId)
+    public async Task<List<Order>> GetUserOrdersAsync(string userId)
     {
-        var order = await _unitOfWork.Orders.GetAsync(o => o.Id == id && o.User.Id == userId, "Course");
-        if (order == null) throw new NotFoundException(Constans.Order, id);
-
-        return _mapper.Map<OrderDto?>(order);
+        return (await _unitOfWork.Orders.GetAllAsync(
+            o => o.User.Id == userId,
+            includeProperties: "Course,User,OrderDetails"
+        )).OrderByDescending(o => o.PurchaseDate).ToList();
     }
 
-    public async Task CreateAsync(OrderDto orderDto)
+    public async Task<List<Order>> GetAllOrdersAsync()
     {
-        var order = _mapper.Map<Order>(orderDto);
-        order.PurchaseDate = DateTime.UtcNow;
+        return (await _unitOfWork.Orders.GetAllAsync(
+            includeProperties: "User,Course,OrderDetails"
+        )).OrderByDescending(o => o.PurchaseDate).ToList();
+    }
+
+    public async Task<Order> CreateOrderAsync(string userId, int courseId, string? paymentStatus, string? transactionId, List<CreateOrderDetailRequest>? orderDetails)
+    {
+        var course = await _unitOfWork.Courses.GetAsync(c => c.Id == courseId);
+        if (course == null) throw new Exception("Course not found");
+
+        // Retrieve the user directly from the unit of work
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) throw new Exception("User not found");
+
+        var order = new Order
+        {
+            User = user, // Set the existing user
+            Course = course,
+            Price = course.Price,
+            PaymentStatus = paymentStatus ?? "Completed",
+            TransactionId = transactionId,
+            OrderDetails = orderDetails?.Select(od => new OrderDetail
+            {
+
+                Price = od.Quantity
+
+            }).ToList()
+        };
 
         await _unitOfWork.Orders.AddAsync(order);
         await _unitOfWork.SaveAsync();
+
+        return order;
+    }
+
+    public async Task<bool> HasUserPurchasedCourseAsync(string userId, int courseId)
+    {
+        var order = await _unitOfWork.Orders.GetAsync(o => o.User.Id == userId && o.Course.Id == courseId);
+        return order != null;
+    }
+
+    public async Task<List<Course>> GetUserPurchasedCoursesAsync(string userId)
+    {
+        return (await _unitOfWork.Orders.GetAllAsync(
+            o => o.User.Id == userId,
+            includeProperties: "Course"
+        )).Select(o => o.Course).Distinct().ToList();
     }
 }
