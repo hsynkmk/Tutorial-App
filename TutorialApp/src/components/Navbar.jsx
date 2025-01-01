@@ -3,12 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { FaUser, FaSignOutAlt, FaShoppingCart } from 'react-icons/fa';
 
+
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const { getCartCount } = useCart();
+  const { getCartCount, clearCart } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    clearCart();
     logout();
     navigate('/');
   };
@@ -32,11 +34,6 @@ const Navbar = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/">
                 Home
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/courses">
-                Courses
               </Link>
             </li>
             {user?.role === 'Educator' && (
