@@ -73,6 +73,54 @@ public class UsersController : ControllerBase
         }
     }
 
+
+    [Authorize(Roles = "Educator")]
+    [HttpPut("{userId}")]
+    public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDto updateUserDto)
+    {
+        if (userId != updateUserDto.Id)
+            return BadRequest("User ID mismatch");
+
+        try
+        {
+            var success = await _userService.UpdateUserAsync(updateUserDto);
+            if (success)
+                return Ok(new { message = "User updated successfully" });
+            return BadRequest(new { message = "Failed to update user" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+
+    [Authorize(Roles = "Educator")]
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> DeleteUser(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return BadRequest("User ID cannot be empty");
+        }
+
+        try
+        {
+            var success = await _userService.DeleteUserAsync(userId);
+            if (success)
+            {
+                return Ok(new { message = "User deleted successfully" });
+            }
+            return NotFound(new { message = "User not found" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+
+
     [Authorize]
     [HttpGet("currentUser")]
     public async Task<ActionResult<UserDto>> GetCurrentUser()

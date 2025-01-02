@@ -85,6 +85,43 @@ internal class UserService : IUserService
         return result.Succeeded;
     }
 
+    public async Task<bool> UpdateUserAsync(UpdateUserDto updateUserDto)
+    {
+        var user = await _userManager.FindByIdAsync(updateUserDto.Id);
+        if (user == null)
+            throw new Exception("User not found");
+
+        // Update basic info
+        user.FullName = updateUserDto.FullName;
+        user.Email = updateUserDto.Email;
+        user.UserName = updateUserDto.Email; // UserName is often set to email in many applications
+
+        // Update password if provided
+        if (!string.IsNullOrEmpty(updateUserDto.NewPassword))
+        {
+            var changePasswordResult = await _userManager.ChangePasswordAsync(
+                user,
+                updateUserDto.CurrentPassword,
+                updateUserDto.NewPassword
+            );
+
+            if (!changePasswordResult.Succeeded)
+            {
+                var errorMessages = string.Join(", ", changePasswordResult.Errors.Select(e => e.Description));
+                throw new Exception($"Password update failed: {errorMessages}");
+            }
+        }
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errorMessages = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new Exception($"User update failed: {errorMessages}");
+        }
+
+        return true;
+    }
+
     public async Task UpdateUserRoleAsync(string userId, string newRole)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -128,6 +165,16 @@ internal class UserService : IUserService
         return await _userManager.FindByIdAsync(id);
     }
 
+    public async Task<bool> DeleteUserAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return false;
+
+        var result = await _userManager.DeleteAsync(user);
+        return result.Succeeded;
+    }
+
+
 
     public async Task<string> GenerateToken(ApplicationUser user)
     {
@@ -136,7 +183,7 @@ internal class UserService : IUserService
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.UserName)
+                new Claim(ClaimTypes.Name, user.FullName)
             };
         var roles = await _userManager.GetRolesAsync(user);
         foreach (var role in roles)
