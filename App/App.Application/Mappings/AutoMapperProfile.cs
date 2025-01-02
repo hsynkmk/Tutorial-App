@@ -9,8 +9,12 @@ internal class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         // User Mapping
-        CreateMap<ApplicationUser, UserDto>()
-            .ReverseMap();
+        {
+            CreateMap<ApplicationUser, UserDto>()
+                .ForMember(dest => dest.Role, opt => opt.Ignore()) // Role is set manually
+                .ForMember(dest => dest.Orders, opt => opt.Ignore()) // Populate manually if needed
+                .ForMember(dest => dest.CartItems, opt => opt.Ignore()); // Populate manually if needed
+        }
 
         // Course Mapping
         CreateMap<Course, CourseDto>()

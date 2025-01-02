@@ -1,5 +1,6 @@
 ﻿using App.Application.DTOs;
 using App.Application.Interfaces;
+using App.Application.Services;
 using App.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -49,20 +50,28 @@ public class UsersController : ControllerBase
 
     [Authorize(Roles = "Educator")]
     [HttpGet]
-    public async Task<ActionResult<List<ApplicationUser>>> GetAllUsers()
+    public async Task<ActionResult<List<UserDto>>> GetAllUsers()
     {
         var users = await _userService.GetAllUsersAsync();
         return Ok(users);
     }
 
-    //[Authorize(Roles = "Educator")]
-    //[HttpPut("{userId}/role")]
-    //public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] UpdateRoleRequest request)
-    //{
-    //    var success = await _userService.UpdateUserRoleAsync(userId, request.Role);
-    //    if (!success) return BadRequest("Failed to update user role");
-    //    return Ok("User role updated successfully");
-    //}
+    [HttpPut("{userId}/role")]
+    public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] string newRole)
+    {
+        if (string.IsNullOrEmpty(newRole))
+            return BadRequest("Role cannot be null or empty");
+
+        try
+        {
+            await _userService.UpdateUserRoleAsync(userId, newRole);
+            return Ok(new { message = "User role updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 
     [Authorize]
     [HttpGet("currentUser")]

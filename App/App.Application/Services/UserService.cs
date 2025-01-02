@@ -1,6 +1,7 @@
 ﻿using App.Application.DTOs;
 using App.Application.Interfaces;
 using App.Domain.Entities;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,17 +16,23 @@ namespace App.Application.Services;
 internal class UserService : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     //private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
+    private readonly IMapper _mapper;
 
     public UserService(
         UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
         //SignInManager<ApplicationUser> signInManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IMapper mapper)
     {
         _userManager = userManager;
+        _roleManager = roleManager;
         //_signInManager = signInManager;
         _configuration = configuration;
+        _mapper = mapper;
     }
 
     public async Task<(bool success, string token)> LoginAsync(string email, string password)
@@ -78,19 +85,42 @@ internal class UserService : IUserService
         return result.Succeeded;
     }
 
-    //public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
-    //{
-    //    var user = await _userManager.FindByIdAsync(userId);
-    //    if (user == null) return false;
-
-    //    user.Role = newRole;
-    //    var result = await _userManager.UpdateAsync(user);
-    //    return result.Succeeded;
-    //}
-
-    public async Task<List<ApplicationUser>> GetAllUsersAsync()
+    public async Task UpdateUserRoleAsync(string userId, string newRole)
     {
-        return await _userManager.Users.ToListAsync();
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            throw new Exception("User not found");
+
+        if (!await _roleManager.RoleExistsAsync(newRole))
+            throw new Exception("Role does not exist");
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Any())
+        {
+            var result = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!result.Succeeded)
+                throw new Exception("Failed to remove existing roles");
+        }
+
+        var addRoleResult = await _userManager.AddToRoleAsync(user, newRole);
+        if (!addRoleResult.Succeeded)
+            throw new Exception("Failed to assign new role");
+    }
+
+    public async Task<List<UserDto>> GetAllUsersAsync()
+    {
+        var users = await _userManager.Users.ToListAsync();
+
+        var userDtos = new List<UserDto>();
+        foreach (var user in users)
+        {
+            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "No Role";
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Role = role;
+            userDtos.Add(userDto);
+        }
+
+        return userDtos;
     }
 
     public async Task<ApplicationUser> GetUserByIdAsync(string id)
@@ -124,4 +154,5 @@ internal class UserService : IUserService
         );
         return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
     }
+
 }
