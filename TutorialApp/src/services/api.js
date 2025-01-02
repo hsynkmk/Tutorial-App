@@ -26,7 +26,7 @@ export const authService = {
 export const userService = {
   getAllUsers: () => api.get('/users'),
   getUserById: (id) => api.get(`/users/${id}`),
-  updateUserRole: (userId, role) => api.put(`/users/${userId}/role`, { role }),
+  updateUserRole: (userId, role) => api.put(`/users/${userId}/role`, role),
   deleteUser: (id) => api.delete(`/users/${id}`),
 };
 

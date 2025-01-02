@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { userService } from '../services/api';
 import { toast } from 'react-toastify';
+import { FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTrash } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { FaUserGraduate, FaChalkboardTeacher } from 'react-icons/fa';
 
 const ManageUsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editMode, setEditMode] = useState(null);
+  const [editData, setEditData] = useState({
+    fullName: '',
+    email: '',
+    role: '',
+    password: ''
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -35,6 +43,61 @@ const ManageUsersPage = () => {
     }
   };
 
+  const handleDelete = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) {
+      return;
+    }
+
+    try {
+      await userService.deleteUser(userId);
+      toast.success('User deleted successfully');
+      fetchUsers();
+    } catch (error) {
+      toast.error('Failed to delete user');
+    }
+  };
+
+  const handleEdit = (user) => {
+    setEditMode(user.id);
+    setEditData({
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      password: ''
+    });
+  };
+
+const handleEditSubmit = async (userId) => {
+  try {
+    const updateData = {
+      id: userId,
+      fullName: editData.fullName,
+      email: editData.email,
+      currentPassword: editData.currentPassword || '',
+      newPassword: editData.newPassword || '',
+    };
+
+    await userService.updateProfile(userId, updateData);
+    toast.success("User updated successfully");
+    setEditMode(null);
+    fetchUsers();
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to update user");
+  }
+};
+
+
+  const handleEditCancel = () => {
+    setEditMode(null);
+    setEditData({
+      fullName: '',
+      email: '',
+      role: '',
+      password: ''
+    });
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="alert alert-danger">{error}</div>;
 
@@ -54,8 +117,38 @@ const ManageUsersPage = () => {
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.fullName}</td>
-                <td>{user.email}</td>
+                <td>
+                  {editMode === user.id ? (
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={editData.fullName}
+                      onChange={(e) => setEditData({ ...editData, fullName: e.target.value })}
+                    />
+                  ) : (
+                    user.fullName
+                  )}
+                </td>
+                <td>
+                  {editMode === user.id ? (
+                    <>
+                      <input
+                        type="email"
+                        className="form-control mb-2"
+                        value={editData.email}
+                        onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                      />
+                      <input
+                        className="form-control"
+                        placeholder="New Password (optional)"
+                        value={editData.password}
+                        onChange={(e) => setEditData({ ...editData, password: e.target.value })}
+                      />
+                    </>
+                  ) : (
+                    user.email
+                  )}
+                </td>
                 <td>
                   <span className="badge bg-primary">
                     {user.role === 'Educator' ? (
@@ -67,14 +160,47 @@ const ManageUsersPage = () => {
                   </span>
                 </td>
                 <td>
-                  <select
-                    className="form-select form-select-sm w-auto"
-                    value={user.role}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                  >
-                    <option value="Student">Student</option>
-                    <option value="Educator">Educator</option>
-                  </select>
+                  <div className="d-flex gap-2">
+                    {editMode === user.id ? (
+                      <>
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => handleEditSubmit(user.id)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={handleEditCancel}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <select
+                          className="form-select form-select-sm w-auto"
+                          value={user.role}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        >
+                          <option value="Student">Student</option>
+                          <option value="Educator">Educator</option>
+                        </select>
+                        <button
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => handleEdit(user)}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleDelete(user.id)}
+                        >
+                          <FaTrash />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
