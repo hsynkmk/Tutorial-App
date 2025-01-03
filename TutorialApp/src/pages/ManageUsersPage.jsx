@@ -67,25 +67,25 @@ const ManageUsersPage = () => {
     });
   };
 
-const handleEditSubmit = async (userId) => {
-  try {
-    const updateData = {
-      id: userId,
-      fullName: editData.fullName,
-      email: editData.email,
-      currentPassword: editData.currentPassword || '',
-      newPassword: editData.newPassword || '',
-    };
+  const handleEditSubmit = async (userId) => {
+    try {
+      const updateData = {
+        id: userId,
+        fullName: editData.fullName,
+        email: editData.email,
+        currentPassword: editData.currentPassword || '',
+        newPassword: editData.newPassword || '',
+      };
 
-    await userService.updateProfile(userId, updateData);
-    toast.success("User updated successfully");
-    setEditMode(null);
-    fetchUsers();
-  } catch (error) {
-    console.error(error);
-    toast.error("Failed to update user");
-  }
-};
+      await userService.updateUser(userId, updateData);
+      toast.success("User updated successfully");
+      setEditMode(null);
+      fetchUsers();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update user");
+    }
+  };
 
 
   const handleEditCancel = () => {
