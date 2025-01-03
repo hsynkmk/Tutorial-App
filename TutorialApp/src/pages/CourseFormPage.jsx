@@ -33,7 +33,7 @@ const CourseFormPage = () => {
       });
     } catch (error) {
       toast.error('Failed to load course');
-      navigate('/manage-courses');
+      navigate(-1);
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ const CourseFormPage = () => {
         await courseService.createCourse(courseData);
         toast.success('Course created successfully');
       }
-      navigate('/my-courses');
+      navigate(-1);
     } catch (error) {
       toast.error(id ? 'Failed to update course' : 'Failed to create course');
     } finally {
@@ -150,7 +150,7 @@ const CourseFormPage = () => {
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => navigate('/manage-courses')}
+                    onClick={() => navigate(-1)}
                   >
                     Cancel
                   </button>

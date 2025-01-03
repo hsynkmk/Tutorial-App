@@ -1,12 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { FaUser, FaSignOutAlt, FaShoppingCart } from 'react-icons/fa';
-
+import { useTheme } from '../context/ThemeContext';
+import { FaUser, FaSignOutAlt, FaShoppingCart, FaSun, FaMoon } from 'react-icons/fa';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { getCartCount, clearCart } = useCart();
+  const { darkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -16,7 +17,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className={`navbar navbar-expand-lg ${darkMode ? 'navbar-dark' : 'navbar-light'}`}>
       <div className="container">
         <Link className="navbar-brand" to="/">
           Learning Platform
@@ -57,6 +58,15 @@ const Navbar = () => {
             )}
           </ul>
           <ul className="navbar-nav">
+            <li className="nav-item">
+              <button
+                className="nav-link btn btn-link"
+                onClick={toggleTheme}
+                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {darkMode ? <FaSun className="text-warning" /> : <FaMoon />}
+              </button>
+            </li>
             <li className="nav-item">
               <Link className="nav-link position-relative" to="/cart">
                 <FaShoppingCart size={20} />

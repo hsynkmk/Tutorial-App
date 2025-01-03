@@ -49,7 +49,7 @@ const ManageCoursesPage = () => {
   return (
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Manage Courses</h2>
+        <h2>Manage All Courses</h2>
         <Link to="/courses/new" className="btn btn-primary">
           <FaPlus className="me-2" />
           Add New Course
@@ -60,17 +60,21 @@ const ManageCoursesPage = () => {
         <table className="table table-hover">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Price</th>
-              <th>Actions</th>
+              <th style={{ width: '20%' }}>Name</th>
+              <th style={{ width: '50%' }}>Description</th>
+              <th style={{ width: '15%' }}>Price</th>
+              <th style={{ width: '15%' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {courses.map((course) => (
               <tr key={course.id}>
                 <td>{course.name}</td>
-                <td>{course.description}</td>
+                <td>
+                  <div style={{ maxHeight: '3rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {course.description}
+                  </div>
+                </td>
                 <td>${course.price}</td>
                 <td>
                   <div className="btn-group">

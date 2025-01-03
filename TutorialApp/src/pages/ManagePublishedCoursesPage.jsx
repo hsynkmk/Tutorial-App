@@ -19,7 +19,8 @@ const ManagePublishedCoursesPage = () => {
       const response = await courseService.getEducatorCourses();
       setCourses(response.data);
       if (response.data.length === 0) {
-        setError('No courses found');
+        toast.error('No courses found');
+        return;
       }
     } catch (err) {
       setError('Failed to load courses');
@@ -60,17 +61,21 @@ const ManagePublishedCoursesPage = () => {
         <table className="table table-hover">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Price</th>
-              <th>Actions</th>
+              <th style={{ width: '20%' }}>Name</th>
+              <th style={{ width: '50%' }}>Description</th>
+              <th style={{ width: '15%' }}>Price</th>
+              <th style={{ width: '15%' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {courses.map((course) => (
               <tr key={course.id}>
                 <td>{course.name}</td>
-                <td>{course.description}</td>
+                <td>
+                  <div style={{ maxHeight: '3rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {course.description}
+                  </div>
+                </td>
                 <td>${course.price}</td>
                 <td>
                   <div className="btn-group">
