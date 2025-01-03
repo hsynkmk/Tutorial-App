@@ -21,6 +21,16 @@ internal class CourseService(IUnitOfWork unitOfWork, IMapper mapper) : ICourseSe
         return _mapper.Map<IEnumerable<CourseDto>>(courses);
     }
 
+    public async Task<IEnumerable<CourseDto>> GetCoursesByCreatorAsync(string userId)
+    {
+        var courses = await _unitOfWork.Courses.GetAllAsync(
+                filter: c => c.CreatedBy == userId
+            );
+
+
+        return _mapper.Map<IEnumerable<CourseDto>>(courses);
+    }
+
     public async Task<CourseDto?> GetByIdAsync(int id)
     {
         var course = await _unitOfWork.Courses.GetAsync(c => c.Id == id);
@@ -51,6 +61,7 @@ internal class CourseService(IUnitOfWork unitOfWork, IMapper mapper) : ICourseSe
     public async Task UpdateAsync(CourseDto courseDto)
     {
         var course = await _unitOfWork.Courses.GetAsync(c => c.Id == courseDto.Id);
+        courseDto.CreatedBy = course.CreatedBy;
         if (course == null) throw new NotFoundException(Constans.Course, courseDto.Name);
 
         // Map only updated properties to the tracked entity

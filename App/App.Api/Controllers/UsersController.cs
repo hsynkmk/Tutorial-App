@@ -38,13 +38,34 @@ public class UsersController : ControllerBase
         return Ok("Registration successful");
     }
 
-    [Authorize]
     [HttpPut("profile")]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserDto updateUserDto)
+    public async Task<IActionResult> UpdateProfile(UpdateProfileDto updateProfileDto)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var success = await _userService.UpdateProfileAsync(userId, updateUserDto.FullName, updateUserDto.CurrentPassword, updateUserDto.NewPassword);
-        if (!success) return BadRequest("Failed to update profile");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+
+        if (!string.IsNullOrEmpty(updateProfileDto.CurrentPassword) && !string.IsNullOrEmpty(updateProfileDto.NewPassword))
+        {
+            var result = await _userManager.ChangePasswordAsync(user, updateProfileDto.CurrentPassword, updateProfileDto.NewPassword);
+            if (!result.Succeeded)
+            {
+                return BadRequest("Password update failed");
+            }
+        }
+
+        user.FullName = updateProfileDto.Name ?? user.FullName;
+        var updateResult = await _userManager.UpdateAsync(user);
+
+        if (!updateResult.Succeeded)
+        {
+            return BadRequest("Failed to update profile");
+        }
+
         return Ok("Profile updated successfully");
     }
 
