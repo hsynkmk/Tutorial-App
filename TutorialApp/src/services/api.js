@@ -37,6 +37,7 @@ export const courseService = {
   createCourse: (courseData) => api.post('/courses', courseData),
   updateCourse: (id, courseData) => api.put(`/courses/${id}`, courseData),
   deleteCourse: (id) => api.delete(`/courses/${id}`),
+  getEducatorCourses: () => api.get('/courses/educator'),
 };
 
 export const orderService = {

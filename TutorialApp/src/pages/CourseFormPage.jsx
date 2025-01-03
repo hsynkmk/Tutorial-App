@@ -64,7 +64,7 @@ const CourseFormPage = () => {
         await courseService.createCourse(courseData);
         toast.success('Course created successfully');
       }
-      navigate('/manage-courses');
+      navigate('/my-courses');
     } catch (error) {
       toast.error(id ? 'Failed to update course' : 'Failed to create course');
     } finally {

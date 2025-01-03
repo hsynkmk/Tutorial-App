@@ -50,13 +50,18 @@ const ProfilePage = () => {
     }
 
     try {
-      await authService.updateProfile({
+      const updatePayload = {
         name: formData.name,
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
-      });
+      };
+
+      await authService.updateProfile(updatePayload);
       toast.success('Profile updated successfully');
       setEditMode(false);
+
+      // Update the user context with the new name
+      user.name = formData.name;
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update profile');
     }

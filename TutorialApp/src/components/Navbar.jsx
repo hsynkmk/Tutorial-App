@@ -40,7 +40,12 @@ const Navbar = () => {
               <>
                 <li className="nav-item">
                   <Link className="nav-link" to="/manage-courses">
-                    Manage Courses
+                    Manage All Courses
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/my-courses">
+                    My Published Courses
                   </Link>
                 </li>
                 <li className="nav-item">

@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const ManageCoursesPage = () => {
+const ManagePublishedCoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,7 +16,7 @@ const ManageCoursesPage = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await courseService.getAllCourses();
+      const response = await courseService.getEducatorCourses();
       setCourses(response.data);
       if (response.data.length === 0) {
         setError('No courses found');
@@ -49,7 +49,7 @@ const ManageCoursesPage = () => {
   return (
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Manage Courses</h2>
+        <h2>My Published Courses</h2>
         <Link to="/courses/new" className="btn btn-primary">
           <FaPlus className="me-2" />
           Add New Course
@@ -97,4 +97,4 @@ const ManageCoursesPage = () => {
   );
 };
 
-export default ManageCoursesPage; 
+export default ManagePublishedCoursesPage; 

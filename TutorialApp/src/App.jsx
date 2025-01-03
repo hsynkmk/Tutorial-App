@@ -13,6 +13,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import ManageCoursesPage from './pages/ManageCoursesPage';
 import CourseFormPage from './pages/CourseFormPage';
 import ManageUsersPage from './pages/ManageUsersPage';
+import ManagePublishedCoursesPage from './pages/ManagePublishedCoursesPage';
 
 // CSS imports
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -79,6 +80,14 @@ const App = () => {
                   element={
                     <PrivateRoute roles={['Educator']}>
                       <ManageCoursesPage />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/my-courses"
+                  element={
+                    <PrivateRoute roles={['Educator']}>
+                      <ManagePublishedCoursesPage />
                     </PrivateRoute>
                   }
                 />
