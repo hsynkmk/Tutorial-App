@@ -12,13 +12,13 @@ namespace App.Api.Controllers;
 [Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IUserService _userService;
+    private readonly IOrderService _orderService;
 
-    public OrdersController(IUnitOfWork unitOfWork, IUserService userService)
+    public OrdersController(IUnitOfWork unitOfWork, IUserService userService, IOrderService orderService)
     {
-        _unitOfWork = unitOfWork;
         _userService = userService;
+        _orderService = orderService;
     }
 
     [HttpGet("user")]
@@ -30,10 +30,8 @@ public class OrdersController : ControllerBase
             return Unauthorized("User not authenticated");
         }
 
-        var orders = await _unitOfWork.Orders.GetAllAsync(
-            o => o.User.Id == userId,
-            includeProperties: "Course,User,OrderDetails"
-        );
+        var orders = await _orderService.GetUserOrdersAsync(userId);
+        
         return Ok(orders);
     }
 
@@ -41,9 +39,7 @@ public class OrdersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<Order>>> GetAllOrders()
     {
-        var orders = await _unitOfWork.Orders.GetAllAsync(
-            includeProperties: "User,Course,OrderDetails"
-        );
+        var orders = await _orderService.GetAllOrdersAsync();
         return Ok(orders);
     }
 
@@ -57,45 +53,7 @@ public class OrdersController : ControllerBase
             return Unauthorized("User not authenticated");
         }
 
-        // Retrieve user from the database using the user service
-        var user = await _userService.GetUserByIdAsync(userId);
-        if (user == null)
-        {
-            return NotFound("User not found");
-        }
-
-        var hasPurchased = await _unitOfWork.Orders.GetAsync(
-            o => o.User.Id == userId && o.Course.Id == request.CourseId
-        );
-
-        if (hasPurchased != null)
-        {
-            return BadRequest("You have already purchased this course");
-        }
-
-        var course = await _unitOfWork.Courses.GetAsync(c => c.Id == request.CourseId);
-        if (course == null)
-        {
-            return NotFound("Course not found");
-        }
-
-        var order = new Order
-        {
-            User = user, // Use the existing user object from the service
-            Course = course,
-            Price = course.Price,
-            TransactionId = request.TransactionId,
-            PaymentStatus = request.PaymentStatus ?? "Completed",
-            OrderDetails = request.OrderDetails?.Select(od => new OrderDetail
-            {
-
-                Price = od.Quantity
-
-            }).ToList()
-        };
-
-        await _unitOfWork.Orders.AddAsync(order);
-        await _unitOfWork.SaveAsync();
+        var order = await _orderService.CreateOrderAsync(request, userId);
 
         return CreatedAtAction(nameof(GetUserOrders), new { }, order);
     }

@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         var applicationAssembly = typeof(ServiceCollectionExtensions).Assembly;
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IOrderService, OrderService>();
         services.AddAutoMapper(applicationAssembly);
         
         services.AddValidatorsFromAssembly(applicationAssembly)

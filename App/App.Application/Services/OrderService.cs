@@ -9,11 +9,13 @@ public class OrderService : IOrderService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IUserService _userService;
 
-    public OrderService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+    public OrderService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IUserService userService)
     {
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _userService = userService;
     }
 
     public async Task<List<Order>> GetUserOrdersAsync(string userId)
@@ -31,23 +33,28 @@ public class OrderService : IOrderService
         )).OrderByDescending(o => o.PurchaseDate).ToList();
     }
 
-    public async Task<Order> CreateOrderAsync(string userId, int courseId, string? paymentStatus, string? transactionId, List<CreateOrderDetailRequest>? orderDetails)
+    public async Task<Order> CreateOrderAsync(CreateOrderRequest request, string userId)
     {
-        var course = await _unitOfWork.Courses.GetAsync(c => c.Id == courseId);
-        if (course == null) throw new Exception("Course not found");
-
-        // Retrieve the user directly from the unit of work
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _userService.GetUserByIdAsync(userId);
         if (user == null) throw new Exception("User not found");
+
+
+        var hasPurchased = await _unitOfWork.Orders.GetAsync(
+            o => o.User.Id == userId && o.Course.Id == request.CourseId
+        );
+        if (hasPurchased != null) throw new Exception("You have already purchased this course");
+
+        var course = await _unitOfWork.Courses.GetAsync(c => c.Id == request.CourseId);
+        if (course == null) throw new Exception("Course not found");
 
         var order = new Order
         {
-            User = user, // Set the existing user
+            User = user, // Use the existing user object from the service
             Course = course,
             Price = course.Price,
-            PaymentStatus = paymentStatus ?? "Completed",
-            TransactionId = transactionId,
-            OrderDetails = orderDetails?.Select(od => new OrderDetail
+            TransactionId = request.TransactionId,
+            PaymentStatus = request.PaymentStatus ?? "Completed",
+            OrderDetails = request.OrderDetails?.Select(od => new OrderDetail
             {
 
                 Price = od.Quantity

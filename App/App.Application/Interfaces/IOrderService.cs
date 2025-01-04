@@ -5,7 +5,7 @@ namespace App.Application.Interfaces;
 
 public interface IOrderService
 {
-    Task<Order> CreateOrderAsync(string userId, int courseId, string? paymentStatus, string? transactionId, List<CreateOrderDetailRequest>? orderDetails);
+    Task<Order> CreateOrderAsync(CreateOrderRequest request, string userId);
     Task<List<Order>> GetAllOrdersAsync();
     Task<List<Order>> GetUserOrdersAsync(string userId);
     Task<List<Course>> GetUserPurchasedCoursesAsync(string userId);
