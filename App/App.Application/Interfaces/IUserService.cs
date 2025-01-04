@@ -5,13 +5,13 @@ namespace App.Application.Interfaces;
 
 public interface IUserService
 {
+    Task<bool> DeleteUserAsync(string userId);
+    Task<List<UserDto>> GetAllUsersAsync();
+    Task<UserDto> GetCurrentUserAsync(string userId);
+    Task<ApplicationUser> GetUserByIdAsync(string id);
     Task<(bool success, string token)> LoginAsync(string email, string password);
     Task<(bool success, string error)> RegisterAsync(string name, string email, string password);
     Task<bool> UpdateProfileAsync(string userId, string fullName, string currentPassword, string newPassword);
-    Task UpdateUserRoleAsync(string userId, string newRole);
     Task<bool> UpdateUserAsync(UpdateUserDto updateUserDto);
-    Task<List<UserDto>> GetAllUsersAsync();
-    Task<ApplicationUser> GetUserByIdAsync(string id);
-    Task<bool> DeleteUserAsync(string userId);
-    Task<string> GenerateToken(ApplicationUser user);
+    Task UpdateUserRoleAsync(string userId, string newRole);
 }

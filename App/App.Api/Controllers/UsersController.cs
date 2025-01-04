@@ -1,9 +1,6 @@
 ﻿using App.Application.DTOs;
 using App.Application.Interfaces;
-using App.Application.Services;
-using App.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -14,12 +11,10 @@ namespace App.API.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
-    private readonly UserManager<ApplicationUser> _userManager;
 
-    public UsersController(UserManager<ApplicationUser> userManager, IUserService userService)
+    public UsersController(IUserService userService)
     {
         _userService = userService;
-        _userManager = userManager;
     }
 
     [HttpPost("login")]
@@ -42,30 +37,9 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> UpdateProfile(UpdateProfileDto updateProfileDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var user = await _userManager.FindByIdAsync(userId);
+        var success = await _userService.UpdateProfileAsync(userId, updateProfileDto.Name, updateProfileDto.CurrentPassword, updateProfileDto.NewPassword);
 
-        if (user == null)
-        {
-            return NotFound("User not found");
-        }
-
-        if (!string.IsNullOrEmpty(updateProfileDto.CurrentPassword) && !string.IsNullOrEmpty(updateProfileDto.NewPassword))
-        {
-            var result = await _userManager.ChangePasswordAsync(user, updateProfileDto.CurrentPassword, updateProfileDto.NewPassword);
-            if (!result.Succeeded)
-            {
-                return BadRequest("Password update failed");
-            }
-        }
-
-        user.FullName = updateProfileDto.Name ?? user.FullName;
-        var updateResult = await _userManager.UpdateAsync(user);
-
-        if (!updateResult.Succeeded)
-        {
-            return BadRequest("Failed to update profile");
-        }
-
+        if (!success) return BadRequest("Failed to update profile");
         return Ok("Profile updated successfully");
     }
 
@@ -94,7 +68,6 @@ public class UsersController : ControllerBase
         }
     }
 
-
     [Authorize(Roles = "Educator")]
     [HttpPut("{userId}")]
     public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDto updateUserDto)
@@ -114,7 +87,6 @@ public class UsersController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
-
 
     [Authorize(Roles = "Educator")]
     [HttpDelete("{userId}")]
@@ -140,19 +112,12 @@ public class UsersController : ControllerBase
         }
     }
 
-
-
     [Authorize]
     [HttpGet("currentUser")]
     public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
-        var user = await _userManager.FindByNameAsync(User.Identity.Name);
-
-        return new UserDto
-        {
-            Email = user.Email,
-            Token = await _userService.GenerateToken(user),
-        };
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userDto = await _userService.GetCurrentUserAsync(userId);
+        return Ok(userDto);
     }
-
 }

@@ -10,27 +10,23 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-
 namespace App.Application.Services;
 
-internal class UserService : IUserService
+public class UserService : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
-    //private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly IMapper _mapper;
 
     public UserService(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
-        //SignInManager<ApplicationUser> signInManager,
         IConfiguration configuration,
         IMapper mapper)
     {
         _userManager = userManager;
         _roleManager = roleManager;
-        //_signInManager = signInManager;
         _configuration = configuration;
         _mapper = mapper;
     }
@@ -42,8 +38,6 @@ internal class UserService : IUserService
 
         var result = await _userManager.CheckPasswordAsync(user, password);
         if (!result) return (false, null);
-
-        await _userManager.UpdateAsync(user);
 
         var token = await GenerateToken(user);
         return (true, token);
@@ -91,12 +85,10 @@ internal class UserService : IUserService
         if (user == null)
             throw new Exception("User not found");
 
-        // Update basic info
         user.FullName = updateUserDto.FullName;
         user.Email = updateUserDto.Email;
-        user.UserName = updateUserDto.Email; // UserName is often set to email in many applications
+        user.UserName = updateUserDto.Email;
 
-        // Update password if provided
         if (!string.IsNullOrEmpty(updateUserDto.NewPassword))
         {
             var changePasswordResult = await _userManager.ChangePasswordAsync(
@@ -174,17 +166,26 @@ internal class UserService : IUserService
         return result.Succeeded;
     }
 
-
-
-    public async Task<string> GenerateToken(ApplicationUser user)
+    public async Task<UserDto> GetCurrentUserAsync(string userId)
     {
-        //claims
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) throw new Exception("User not found");
+
+        var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "No Role";
+        var userDto = _mapper.Map<UserDto>(user);
+        userDto.Role = role;
+        userDto.Token = await GenerateToken(user);
+        return userDto;
+    }
+
+    private async Task<string> GenerateToken(ApplicationUser user)
+    {
         var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.FullName)
-            };
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.FullName)
+        };
         var roles = await _userManager.GetRolesAsync(user);
         foreach (var role in roles)
         {
@@ -201,5 +202,4 @@ internal class UserService : IUserService
         );
         return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
     }
-
 }
