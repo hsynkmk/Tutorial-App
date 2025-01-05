@@ -41,7 +41,16 @@ builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddCors();
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -55,10 +64,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors(opt =>
-{
-    opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
-});
+
+app.UseCors();
 
 //Seed database
 var scope = app.Services.CreateScope();
