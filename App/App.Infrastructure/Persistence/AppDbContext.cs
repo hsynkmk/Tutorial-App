@@ -9,7 +9,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public required DbSet<Course> Courses { get; set; }
     public required DbSet<Order> Orders { get; set; }
     public required DbSet<OrderDetail> OrderDetails { get; set; }
-    public required DbSet<CartItem> CartItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

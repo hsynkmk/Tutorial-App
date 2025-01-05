@@ -1,6 +1,7 @@
 ﻿using App.Application.Common;
-using App.Application.DTOs;
-using App.Application.Interfaces;
+using App.Application.DTOs.Identity;
+using App.Application.Interfaces.Service;
+using App.Domain.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -44,9 +45,9 @@ public class UsersController : ControllerBase
         return Ok("Profile updated successfully");
     }
 
-    [Authorize(Roles = "Educator")]
+    [Authorize(Roles = UserRoles.Educator)]
     [HttpGet]
-    public async Task<ActionResult<PaginationResponse<UserDto>>> GetAllUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<PaginationResponse<UserDto>>> GetAllUsers(int pageNumber = Pagination.DefaultPageNumber, int pageSize = Pagination.DefaultPageSize)
     {
         var users = await _userService.GetAllUsersAsync(pageNumber, pageSize);
         return Ok(users);
@@ -69,7 +70,7 @@ public class UsersController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Educator")]
+    [Authorize(Roles = UserRoles.Educator)]
     [HttpPut("{userId}")]
     public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDto updateUserDto)
     {
@@ -89,7 +90,7 @@ public class UsersController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Educator")]
+    [Authorize(Roles = UserRoles.Educator)]
     [HttpDelete("{userId}")]
     public async Task<IActionResult> DeleteUser(string userId)
     {

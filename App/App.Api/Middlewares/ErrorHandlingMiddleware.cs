@@ -25,7 +25,13 @@ public class ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger) : 
 			var response = new { Message = "Validation errors occurred.", Errors = validationErrors };
 			await HandleExceptionAsync(context, HttpStatusCode.BadRequest, response);
 		}
-		catch (Exception ex)
+        catch (FailedOperationException ex)
+        {
+            logger.LogError(ex, ex.Message);
+            var response = new { ex.Message };
+            await HandleExceptionAsync(context, HttpStatusCode.BadRequest, response);
+        }
+        catch (Exception ex)
 		{
 			logger.LogError(ex, ex.Message);
 			await HandleExceptionAsync(context, HttpStatusCode.InternalServerError, "An unexpected error occurred. Please try again later.");

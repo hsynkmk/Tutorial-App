@@ -1,9 +1,8 @@
-﻿namespace App.Application.DTOs;
-
-public class OrderDetailDto
+﻿namespace App.Application.DTOs.Cart;
+public class CartItemDto
 {
     public int Id { get; set; }
     public int CourseId { get; set; }
     public string CourseName { get; set; }
-    public decimal Price { get; set; }
+    public DateTime AddedDate { get; set; }
 }

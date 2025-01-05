@@ -1,11 +1,12 @@
-﻿using App.Application.DTOs;
-using App.Application.Interfaces;
-using App.Domain.Entities;
+﻿using App.Domain.Entities;
 using App.Domain.Exceptions;
 using AutoMapper;
 using App.Domain.Common;
 using App.Application.Common;
 using Microsoft.EntityFrameworkCore;
+using App.Application.DTOs.Course;
+using App.Application.Interfaces.Repository;
+using App.Application.Interfaces.Service;
 
 namespace App.Application.Services;
 
@@ -44,14 +45,14 @@ internal class CourseService(IUnitOfWork unitOfWork, IMapper mapper) : ICourseSe
 
         var courseDtos = _mapper.Map<List<CourseDto>>(courses);
 
-        return new PaginationResponse<CourseDto>(pageNumber, pageSize, totalRecords, courseDtos);
+        return new PaginationResponse<CourseDto>(pageNumber, pageSize, totalRecords, courseDtos.ToList());
     }
 
     public async Task<CourseDto?> GetByIdAsync(int id)
     {
         var course = await _unitOfWork.Courses.GetAsync(c => c.Id == id);
         
-        if (course == null) throw new NotFoundException(Constans.Course, id);
+        if (course == null) throw new NotFoundException(Const.Course, id);
         
         return _mapper.Map<CourseDto?>(course);
     }
@@ -67,7 +68,7 @@ internal class CourseService(IUnitOfWork unitOfWork, IMapper mapper) : ICourseSe
     {
         var course = await _unitOfWork.Courses.GetAsync(c => c.Id == id);
         
-        if (course == null) throw new NotFoundException(Constans.Course, id);
+        if (course == null) throw new NotFoundException(Const.Course, id);
 
         _unitOfWork.Courses.Remove(course);
         await _unitOfWork.SaveAsync();
@@ -78,9 +79,8 @@ internal class CourseService(IUnitOfWork unitOfWork, IMapper mapper) : ICourseSe
     {
         var course = await _unitOfWork.Courses.GetAsync(c => c.Id == courseDto.Id);
         courseDto.CreatedBy = course.CreatedBy;
-        if (course == null) throw new NotFoundException(Constans.Course, courseDto.Name);
+        if (course == null) throw new NotFoundException(Const.Course, courseDto.Name);
 
-        // Map only updated properties to the tracked entity
         _mapper.Map(courseDto, course);
 
         _unitOfWork.Courses.Update(course);

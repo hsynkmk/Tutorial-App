@@ -1,7 +1,11 @@
-﻿using App.Application.DTOs;
-using App.Application.Interfaces;
+﻿using App.Application.DTOs.Order;
+using App.Application.Interfaces.Repository;
+using App.Application.Interfaces.Service;
+using App.Domain.Common;
 using App.Domain.Entities;
+using App.Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.VisualBasic;
 
 namespace App.Application.Services;
 
@@ -33,19 +37,19 @@ public class OrderService : IOrderService
         )).OrderByDescending(o => o.PurchaseDate).ToList();
     }
 
-    public async Task<Order> CreateOrderAsync(CreateOrderRequest request, string userId)
+    public async Task<Order> CreateOrderAsync(CreateOrderDto request, string userId)
     {
         var user = await _userService.GetUserByIdAsync(userId);
-        if (user == null) throw new Exception("User not found");
+        if (user == null) throw new FailedOperationException("User not found");
 
 
         var hasPurchased = await _unitOfWork.Orders.GetAsync(
             o => o.User.Id == userId && o.Course.Id == request.CourseId
         );
-        if (hasPurchased != null) throw new Exception("You have already purchased this course");
+        if (hasPurchased != null) throw new FailedOperationException("You have already purchased this course");
 
         var course = await _unitOfWork.Courses.GetAsync(c => c.Id == request.CourseId);
-        if (course == null) throw new Exception("Course not found");
+        if (course == null) throw new FailedOperationException("Course not found");
 
         var order = new Order
         {
@@ -53,13 +57,8 @@ public class OrderService : IOrderService
             Course = course,
             Price = course.Price,
             TransactionId = request.TransactionId,
-            PaymentStatus = request.PaymentStatus ?? "Completed",
-            OrderDetails = request.OrderDetails?.Select(od => new OrderDetail
-            {
-
-                Price = od.Quantity
-
-            }).ToList()
+            PaymentStatus = request.PaymentStatus ?? Const.Completed,
+            OrderDetails = request.OrderDetails?.Select(od => new OrderDetail { Price = od.Quantity }).ToList()
         };
 
         await _unitOfWork.Orders.AddAsync(order);

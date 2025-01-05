@@ -1,6 +1,6 @@
 ﻿using App.Application.Common;
-using App.Application.DTOs;
-using App.Application.Interfaces;
+using App.Application.DTOs.Identity;
+using App.Application.Interfaces.Service;
 using App.Domain.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;

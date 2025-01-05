@@ -39,7 +39,6 @@ internal class UserSeeder(AppDbContext dbContext, UserManager<ApplicationUser> u
         }
     }
 
-
     private IEnumerable<IdentityRole> GetRoles()
     {
         return

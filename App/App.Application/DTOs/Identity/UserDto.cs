@@ -1,4 +1,7 @@
-﻿namespace App.Application.DTOs;
+﻿using App.Application.DTOs.Cart;
+using App.Application.DTOs.Order;
+
+namespace App.Application.DTOs.Identity;
 
 public class UserDto
 {

@@ -1,4 +1,4 @@
-﻿using App.Application.Interfaces;
+﻿using App.Application.Interfaces.Service;
 using App.Application.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;

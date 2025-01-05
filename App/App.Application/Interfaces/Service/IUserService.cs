@@ -1,8 +1,8 @@
 ﻿using App.Application.Common;
-using App.Application.DTOs;
+using App.Application.DTOs.Identity;
 using App.Domain.Entities;
 
-namespace App.Application.Interfaces;
+namespace App.Application.Interfaces.Service;
 
 public interface IUserService
 {

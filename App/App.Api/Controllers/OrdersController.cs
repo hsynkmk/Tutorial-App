@@ -1,5 +1,7 @@
-﻿using App.Application.DTOs;
-using App.Application.Interfaces;
+﻿using App.Application.DTOs.Order;
+using App.Application.Interfaces.Repository;
+using App.Application.Interfaces.Service;
+using App.Domain.Common;
 using App.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,17 +27,13 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult<List<Order>>> GetUserOrders()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
-        {
-            return Unauthorized("User not authenticated");
-        }
 
         var orders = await _orderService.GetUserOrdersAsync(userId);
         
         return Ok(orders);
     }
 
-    [Authorize(Roles = "Educator")]
+    [Authorize(Roles = UserRoles.Educator)]
     [HttpGet]
     public async Task<ActionResult<List<Order>>> GetAllOrders()
     {
@@ -44,14 +42,9 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Order>> CreateOrder([FromBody] CreateOrderRequest request)
+    public async Task<ActionResult<Order>> CreateOrder([FromBody] CreateOrderDto request)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userId == null)
-        {
-            return Unauthorized("User not authenticated");
-        }
 
         var order = await _orderService.CreateOrderAsync(request, userId);
 

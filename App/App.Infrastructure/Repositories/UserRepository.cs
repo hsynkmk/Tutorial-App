@@ -1,4 +1,4 @@
-﻿using App.Application.Interfaces;
+﻿using App.Application.Interfaces.Repository;
 using App.Domain.Entities;
 using App.Infrastructure.Persistence;
 

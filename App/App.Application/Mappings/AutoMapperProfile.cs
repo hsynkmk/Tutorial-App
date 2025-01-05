@@ -1,4 +1,6 @@
-﻿using App.Application.DTOs;
+﻿using App.Application.DTOs.Course;
+using App.Application.DTOs.Identity;
+using App.Application.DTOs.Order;
 using App.Domain.Entities;
 using AutoMapper;
 
@@ -11,9 +13,9 @@ internal class AutoMapperProfile : Profile
         // User Mapping
         {
             CreateMap<ApplicationUser, UserDto>()
-                .ForMember(dest => dest.Role, opt => opt.Ignore()) // Role is set manually
-                .ForMember(dest => dest.Orders, opt => opt.Ignore()) // Populate manually if needed
-                .ForMember(dest => dest.CartItems, opt => opt.Ignore()); // Populate manually if needed
+                .ForMember(dest => dest.Role, opt => opt.Ignore())
+                .ForMember(dest => dest.Orders, opt => opt.Ignore())
+                .ForMember(dest => dest.CartItems, opt => opt.Ignore());
         }
 
         // Course Mapping
@@ -26,10 +28,6 @@ internal class AutoMapperProfile : Profile
 
         // OrderDetail Mapping
         CreateMap<OrderDetail, OrderDetailDto>()
-            .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Course.Name));
-
-        // CartItem Mapping
-        CreateMap<CartItem, CartItemDto>()
             .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Course.Name));
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace App.Application.DTOs;
+﻿namespace App.Application.DTOs.Identity;
 public class UpdateUserDto
 {
     public string Id { get; set; }

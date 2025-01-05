@@ -1,4 +1,4 @@
-﻿namespace App.Application.Interfaces;
+﻿namespace App.Application.Interfaces.Repository;
 
 public interface IUnitOfWork
 {

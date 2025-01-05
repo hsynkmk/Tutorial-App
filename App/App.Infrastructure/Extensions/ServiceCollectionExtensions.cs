@@ -1,5 +1,4 @@
-﻿using App.Application.Interfaces;
-using App.Infrastructure.Persistence;
+﻿using App.Infrastructure.Persistence;
 using App.Infrastructure.Seeders;
 using App.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using App.Application.Interfaces.Repository;
 
 namespace App.Infrastructure.Extensions;
 

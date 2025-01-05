@@ -1,4 +1,4 @@
-﻿namespace App.Application.DTOs;
+﻿namespace App.Application.DTOs.Identity;
 public class UpdateProfileDto
 {
     public string Name { get; set; }
