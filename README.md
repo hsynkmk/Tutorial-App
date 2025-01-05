@@ -1,6 +1,11 @@
 # Backend Project
 
-Live App: https://hsynkmkstutorialapp.netlify.app/
+Live App: https://hsynkmkstutorialapp.netlify.app/ <br><br>
+Educator: educator@gmail.com <br>
+Password: Educator1. <br>
+<br>
+Student: student@gmail.com <br>
+Password: Student1.
 
 This repository contains a web application built with **ASP.NET Core** and **React** following the principles of **Clean Architecture**. The project is designed to be modular, scalable, and maintainable, utilizing various modern patterns and libraries. Below is a detailed overview of the technologies and approaches used in the project.
 
