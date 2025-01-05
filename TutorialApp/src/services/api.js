@@ -24,7 +24,11 @@ export const authService = {
 };
 
 export const userService = {
-  getAllUsers: () => api.get('/users'),
+  getAllUsers: (pageNumber = 1, pageSize = 10) => {
+    return api.get('/users', {
+      params: { pageNumber, pageSize }
+    });
+  },
   getUserById: (id) => api.get(`/users/${id}`),
   updateUser: (id, updateData) => api.put(`/users/${id}`, updateData),
   updateUserRole: (userId, role) => api.put(`/users/${userId}/role`, role),
@@ -32,7 +36,11 @@ export const userService = {
 };
 
 export const courseService = {
-  getAllCourses: () => api.get('/courses'),
+  getAllCourses: (pageNumber = 1, pageSize = 10) => {
+    return api.get('/courses', {
+      params: { pageNumber, pageSize }
+    });
+  },
   getCourseById: (id) => api.get(`/courses/${id}`),
   searchCourses: (query) => api.get(`/courses/search?q=${query}`),
   createCourse: (courseData) => api.post('/courses', courseData),

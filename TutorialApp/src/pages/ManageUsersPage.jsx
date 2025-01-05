@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { userService } from '../services/api';
 import { toast } from 'react-toastify';
 import { FaUserGraduate, FaChalkboardTeacher, FaEdit, FaTrash } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Pagination from '../components/Pagination';
 
 const ManageUsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -16,21 +16,35 @@ const ManageUsersPage = () => {
     role: '',
     password: ''
   });
+  const [pagination, setPagination] = useState({
+    pageNumber: 1,
+    pageSize: 10,
+    totalRecords: 0,
+  });
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [pagination.pageNumber]);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
-      const response = await userService.getAllUsers();
-      setUsers(response.data);
+      const response = await userService.getAllUsers(pagination.pageNumber, pagination.pageSize);
+      setUsers(response.data.data);
+      setPagination({
+        ...pagination,
+        totalRecords: response.data.totalRecords,
+      });
     } catch (err) {
       setError('Failed to load users');
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setPagination({ ...pagination, pageNumber });
   };
 
   const handleRoleChange = async (userId, newRole) => {
@@ -207,8 +221,14 @@ const ManageUsersPage = () => {
           </tbody>
         </table>
       </div>
+      <Pagination
+        totalRecords={pagination.totalRecords}
+        pageSize={pagination.pageSize}
+        currentPage={pagination.pageNumber}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };
 
-export default ManageUsersPage; 
+export default ManageUsersPage;

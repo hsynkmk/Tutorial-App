@@ -4,21 +4,26 @@ import { courseService } from '../services/api';
 import { toast } from 'react-toastify';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Pagination from '../components/Pagination'; // Assuming you already have this component
 
 const ManagePublishedCoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);  // Page number state
+  const [pageSize, setPageSize] = useState(10);     // Page size state
+  const [totalRecords, setTotalRecords] = useState(0); // Total records state
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+  }, [pageNumber, pageSize]); // Fetch courses when pageNumber or pageSize changes
 
   const fetchCourses = async () => {
     try {
-      const response = await courseService.getEducatorCourses();
-      setCourses(response.data);
-      if (response.data.length === 0) {
+      const response = await courseService.getEducatorCourses(pageNumber, pageSize); // Pass pageNumber and pageSize
+      setCourses(response.data.data);
+      setTotalRecords(response.data.totalRecords); // Assuming the response includes totalRecords
+      if (response.data.data.length === 0) {
         toast.error('No courses found');
         return;
       }
@@ -38,10 +43,14 @@ const ManagePublishedCoursesPage = () => {
     try {
       await courseService.deleteCourse(courseId);
       toast.success('Course deleted successfully');
-      fetchCourses();
+      fetchCourses(); // Re-fetch the courses after deletion
     } catch (error) {
       toast.error('Failed to delete course');
     }
+  };
+
+  const handlePageChange = (newPageNumber) => {
+    setPageNumber(newPageNumber);
   };
 
   if (loading) return <LoadingSpinner />;
@@ -98,8 +107,15 @@ const ManagePublishedCoursesPage = () => {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        currentPage={pageNumber}
+        totalRecords={totalRecords} // Pass totalRecords for pagination
+        pageSize={pageSize}
+        onPageChange={handlePageChange} // Pass the handler to change page
+      />
     </div>
   );
 };
 
-export default ManagePublishedCoursesPage; 
+export default ManagePublishedCoursesPage;

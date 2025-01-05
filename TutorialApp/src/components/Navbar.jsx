@@ -40,7 +40,7 @@ const Navbar = () => {
             {user?.role === 'Educator' && (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/manage-courses">
+                  <Link className="nav-link text-danger" to="/manage-courses">
                     Manage All Courses
                   </Link>
                 </li>
@@ -82,7 +82,7 @@ const Navbar = () => {
                 <li className="nav-item">
                   <Link className="nav-link" to="/profile">
                     <FaUser className="me-1" />
-                    Profile
+                    {user.name}
                   </Link>
                 </li>
                 <li className="nav-item">

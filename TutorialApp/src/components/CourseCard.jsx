@@ -2,8 +2,16 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 const CourseCard = ({ course }) => {
+  const imageUrl = course.image || 'https://via.placeholder.com/300x200.png?text=Course+Images+Coming+Soon';
+
   return (
     <div className="card h-100 shadow-sm">
+      <img
+        src={imageUrl}
+        className="card-img-top"
+        alt={course.name}
+        style={{ objectFit: 'cover', height: '200px' }}
+      />
       <div className="card-body d-flex flex-column">
         <h5 className="card-title">{course.name}</h5>
         <p className="card-text text-truncate mb-3" style={{ maxHeight: '3rem', overflow: 'hidden' }}>
@@ -29,7 +37,8 @@ CourseCard.propTypes = {
     name: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     price: PropTypes.number.isRequired,
+    image: PropTypes.string,
   }).isRequired,
 };
 
-export default CourseCard; 
+export default CourseCard;

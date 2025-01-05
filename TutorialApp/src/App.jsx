@@ -41,7 +41,7 @@ const PrivateRoute = ({ children, roles }) => {
 
 const AppContent = () => {
   const { darkMode } = useTheme();
-  
+
   return (
     <div className="min-vh-100 d-flex flex-column">
       <Navbar />
@@ -133,10 +133,10 @@ const App = () => {
         <CartProvider>
           <Router>
             <AppContent />
-            <ToastContainer 
-              position="top-right" 
+            <ToastContainer
+              position="top-center"
               autoClose={3000}
-              theme="colored" 
+              theme="colored"
             />
           </Router>
         </CartProvider>

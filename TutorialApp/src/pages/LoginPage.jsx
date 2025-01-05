@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { toast } from 'react-toastify';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const LoginPage = () => {
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -37,6 +39,10 @@ const LoginPage = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
@@ -59,12 +65,12 @@ const LoginPage = () => {
                     required
                   />
                 </div>
-                <div className="mb-3">
+                <div className="mb-3 position-relative">
                   <label htmlFor="password" className="form-label">
                     Password
                   </label>
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     className="form-control"
                     id="password"
                     name="password"
@@ -72,6 +78,18 @@ const LoginPage = () => {
                     onChange={handleChange}
                     required
                   />
+                  <button
+                    type="button"
+                    className="position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent"
+                    style={{ right: '10px' }}
+                    onClick={togglePasswordVisibility}
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash className="text-muted" />
+                    ) : (
+                      <FaEye className="text-muted" />
+                    )}
+                  </button>
                 </div>
                 <button
                   type="submit"
@@ -93,4 +111,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

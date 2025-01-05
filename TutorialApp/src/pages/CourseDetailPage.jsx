@@ -63,6 +63,7 @@ const CourseDetailPage = () => {
                       {outcome}
                     </li>
                   ))}
+                  Coming soon...
                 </ul>
               </div>
             </div>
@@ -71,7 +72,7 @@ const CourseDetailPage = () => {
         <div className="col-lg-4">
           <div className="card">
             <div className="card-body">
-              <h5 className="card-title">Course Details</h5>
+              <h5 className="card-title">Price</h5>
               <p className="h2 mb-4">${course.price}</p>
               <button
                 className="btn btn-primary w-100 mb-3"
