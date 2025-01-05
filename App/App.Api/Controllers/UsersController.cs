@@ -1,4 +1,5 @@
-﻿using App.Application.DTOs;
+﻿using App.Application.Common;
+using App.Application.DTOs;
 using App.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,9 +46,9 @@ public class UsersController : ControllerBase
 
     [Authorize(Roles = "Educator")]
     [HttpGet]
-    public async Task<ActionResult<List<UserDto>>> GetAllUsers()
+    public async Task<ActionResult<PaginationResponse<UserDto>>> GetAllUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var users = await _userService.GetAllUsersAsync();
+        var users = await _userService.GetAllUsersAsync(pageNumber, pageSize);
         return Ok(users);
     }
 

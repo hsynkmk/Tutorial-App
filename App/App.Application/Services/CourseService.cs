@@ -4,6 +4,8 @@ using App.Domain.Entities;
 using App.Domain.Exceptions;
 using AutoMapper;
 using App.Domain.Common;
+using App.Application.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace App.Application.Services;
 
@@ -12,23 +14,37 @@ internal class CourseService(IUnitOfWork unitOfWork, IMapper mapper) : ICourseSe
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<IEnumerable<CourseDto>> GetAllAsync()
+    public async Task<PaginationResponse<CourseDto>> GetAllAsync(int pageNumber, int pageSize)
     {
-        var courses = await _unitOfWork.Courses.GetAllAsync();
+        var coursesQuery = _unitOfWork.Courses.GetAllQueryable();
 
-        if (courses == null) throw new NotFoundException(Constans.Course, "all");
+        var totalRecords = await coursesQuery.CountAsync();
+        var courses = await coursesQuery
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
 
-        return _mapper.Map<IEnumerable<CourseDto>>(courses);
+        var courseDtos = _mapper.Map<IEnumerable<CourseDto>>(courses);
+
+        return new PaginationResponse<CourseDto>(pageNumber, pageSize, totalRecords, courseDtos.ToList());
     }
 
-    public async Task<IEnumerable<CourseDto>> GetCoursesByCreatorAsync(string userId)
+    public async Task<PaginationResponse<CourseDto>> GetCoursesByCreatorAsync(string userId, int pageNumber, int pageSize)
     {
-        var courses = await _unitOfWork.Courses.GetAllAsync(
-                filter: c => c.CreatedBy == userId
-            );
+        var query = _unitOfWork.Courses.GetAllQueryable(
+            filter: c => c.CreatedBy == userId
+        );
 
+        var totalRecords = await query.CountAsync();
 
-        return _mapper.Map<IEnumerable<CourseDto>>(courses);
+        var courses = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var courseDtos = _mapper.Map<List<CourseDto>>(courses);
+
+        return new PaginationResponse<CourseDto>(pageNumber, pageSize, totalRecords, courseDtos);
     }
 
     public async Task<CourseDto?> GetByIdAsync(int id)

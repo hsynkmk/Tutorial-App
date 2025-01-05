@@ -12,14 +12,15 @@ public class CoursesController(ICourseService courseService) : ControllerBase
     private readonly ICourseService _courseService = courseService;
 
     [HttpGet]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> Get(int pageNumber = 1, int pageSize = 10)
     {
-        var courses = await _courseService.GetAllAsync();
-        return Ok(courses);
+        var paginatedCourses = await _courseService.GetAllAsync(pageNumber, pageSize);
+        return Ok(paginatedCourses);
     }
 
+
     [HttpGet("educator")]
-    public async Task<IActionResult> GetCoursesByCreator()
+    public async Task<IActionResult> GetCoursesByCreator(int pageNumber = 1, int pageSize = 10)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -28,10 +29,11 @@ public class CoursesController(ICourseService courseService) : ControllerBase
             return Unauthorized("User is not logged in");
         }
 
-        var courses = await _courseService.GetCoursesByCreatorAsync(userId);
+        var courses = await _courseService.GetCoursesByCreatorAsync(userId, pageNumber, pageSize);
 
-        return Ok(courses); ;
+        return Ok(courses);
     }
+
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)

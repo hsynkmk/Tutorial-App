@@ -61,6 +61,26 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
         return await query.ToListAsync();
     }
 
+    public IQueryable<T> GetAllQueryable(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+    {
+        IQueryable<T> query = dbSet;
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        if (!string.IsNullOrEmpty(includeProperties))
+        {
+            foreach (var includeProp in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProp);
+            }
+        }
+
+        return query;
+    }
+
     public void Remove(T entity)
     {
         dbSet.Remove(entity);

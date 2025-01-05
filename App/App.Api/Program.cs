@@ -61,11 +61,12 @@ app.UseCors(opt =>
 
 //Seed database
 var scope = app.Services.CreateScope();
+var seeder2 = scope.ServiceProvider.GetRequiredService<IUserSeeder>();
+await seeder2.Seed();
+
 var seeder = scope.ServiceProvider.GetRequiredService<ICourseSeeder>();
 await seeder.Seed();
 
-var seeder2 = scope.ServiceProvider.GetRequiredService<IUserSeeder>();
-await seeder2.Seed();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseHttpsRedirection();

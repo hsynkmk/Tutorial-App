@@ -1,4 +1,5 @@
-﻿using App.Application.DTOs;
+﻿using App.Application.Common;
+using App.Application.DTOs;
 using App.Application.Interfaces;
 using App.Domain.Entities;
 using AutoMapper;
@@ -66,6 +67,9 @@ public class UserService : IUserService
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return false;
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, currentPassword);
+        if (!passwordValid) return false;
 
         user.FullName = fullName;
 
@@ -136,9 +140,13 @@ public class UserService : IUserService
             throw new Exception("Failed to assign new role");
     }
 
-    public async Task<List<UserDto>> GetAllUsersAsync()
+    public async Task<PaginationResponse<UserDto>> GetAllUsersAsync(int pageNumber, int pageSize)
     {
-        var users = await _userManager.Users.ToListAsync();
+        var totalRecords = await _userManager.Users.CountAsync();
+        var users = await _userManager.Users
+                                      .Skip((pageNumber - 1) * pageSize)
+                                      .Take(pageSize)
+                                      .ToListAsync();
 
         var userDtos = new List<UserDto>();
         foreach (var user in users)
@@ -149,7 +157,7 @@ public class UserService : IUserService
             userDtos.Add(userDto);
         }
 
-        return userDtos;
+        return new PaginationResponse<UserDto>(pageNumber, pageSize, totalRecords, userDtos);
     }
 
     public async Task<ApplicationUser> GetUserByIdAsync(string id)
