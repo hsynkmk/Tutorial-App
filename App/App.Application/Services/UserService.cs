@@ -95,18 +95,25 @@ public class UserService : IUserService
         user.Email = updateUserDto.Email;
         user.UserName = updateUserDto.Email;
 
+        //new password
         if (!string.IsNullOrEmpty(updateUserDto.NewPassword))
         {
-            var changePasswordResult = await _userManager.ChangePasswordAsync(
-                user,
-                updateUserDto.CurrentPassword,
-                updateUserDto.NewPassword
-            );
-
-            if (!changePasswordResult.Succeeded)
+            var hasPassword = await _userManager.HasPasswordAsync(user);
+            if (hasPassword)
             {
-                var errorMessages = string.Join(", ", changePasswordResult.Errors.Select(e => e.Description));
-                throw new FailedOperationException($"Password update failed: {errorMessages}");
+                var removePasswordResult = await _userManager.RemovePasswordAsync(user);
+                if (!removePasswordResult.Succeeded)
+                {
+                    var errorMessages = string.Join(", ", removePasswordResult.Errors.Select(e => e.Description));
+                    throw new FailedOperationException($"Password removal failed: {errorMessages}");
+                }
+            }
+
+            var addPasswordResult = await _userManager.AddPasswordAsync(user, updateUserDto.NewPassword);
+            if (!addPasswordResult.Succeeded)
+            {
+                var errorMessages = string.Join(", ", addPasswordResult.Errors.Select(e => e.Description));
+                throw new FailedOperationException($"Password addition failed: {errorMessages}");
             }
         }
 
@@ -119,6 +126,7 @@ public class UserService : IUserService
 
         return true;
     }
+
 
     public async Task UpdateUserRoleAsync(string userId, string newRole)
     {
