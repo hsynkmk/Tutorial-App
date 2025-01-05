@@ -1,7 +1,9 @@
 ﻿using App.Application.Common;
 using App.Application.DTOs.Identity;
 using App.Application.Interfaces.Service;
+using App.Domain.Common;
 using App.Domain.Entities;
+using App.Domain.Exceptions;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -59,7 +61,7 @@ public class UserService : IUserService
             return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
-        await _userManager.AddToRoleAsync(user, "Student");
+        await _userManager.AddToRoleAsync(user, UserRoles.Student);
         return (true, null);
     }
 
@@ -87,7 +89,7 @@ public class UserService : IUserService
     {
         var user = await _userManager.FindByIdAsync(updateUserDto.Id);
         if (user == null)
-            throw new Exception("User not found");
+            throw new FailedOperationException("User not found");
 
         user.FullName = updateUserDto.FullName;
         user.Email = updateUserDto.Email;
@@ -104,7 +106,7 @@ public class UserService : IUserService
             if (!changePasswordResult.Succeeded)
             {
                 var errorMessages = string.Join(", ", changePasswordResult.Errors.Select(e => e.Description));
-                throw new Exception($"Password update failed: {errorMessages}");
+                throw new FailedOperationException($"Password update failed: {errorMessages}");
             }
         }
 
@@ -112,7 +114,7 @@ public class UserService : IUserService
         if (!result.Succeeded)
         {
             var errorMessages = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new Exception($"User update failed: {errorMessages}");
+            throw new FailedOperationException($"User update failed: {errorMessages}");
         }
 
         return true;
@@ -122,22 +124,22 @@ public class UserService : IUserService
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
-            throw new Exception("User not found");
+            throw new FailedOperationException("User not found");
 
         if (!await _roleManager.RoleExistsAsync(newRole))
-            throw new Exception("Role does not exist");
+            throw new FailedOperationException("Role does not exist");
 
         var currentRoles = await _userManager.GetRolesAsync(user);
         if (currentRoles.Any())
         {
             var result = await _userManager.RemoveFromRolesAsync(user, currentRoles);
             if (!result.Succeeded)
-                throw new Exception("Failed to remove existing roles");
+                throw new FailedOperationException("Failed to remove existing roles");
         }
 
         var addRoleResult = await _userManager.AddToRoleAsync(user, newRole);
         if (!addRoleResult.Succeeded)
-            throw new Exception("Failed to assign new role");
+            throw new FailedOperationException("Failed to assign new role");
     }
 
     public async Task<PaginationResponse<UserDto>> GetAllUsersAsync(int pageNumber, int pageSize)
@@ -177,7 +179,7 @@ public class UserService : IUserService
     public async Task<UserDto> GetCurrentUserAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null) throw new Exception("User not found");
+        if (user == null) throw new FailedOperationException("User not found");
 
         var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "No Role";
         var userDto = _mapper.Map<UserDto>(user);

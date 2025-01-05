@@ -53,7 +53,7 @@ public class OrderService : IOrderService
 
         var order = new Order
         {
-            User = user, // Use the existing user object from the service
+            User = user,
             Course = course,
             Price = course.Price,
             TransactionId = request.TransactionId,
