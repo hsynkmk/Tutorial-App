@@ -1,0 +1,44 @@
+import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+
+const CourseCard = ({ course }) => {
+  const imageUrl = course.image || 'https://via.placeholder.com/300x200.png?text=Course+Images+Coming+Soon';
+
+  return (
+    <div className="card h-100 shadow-sm">
+      <img
+        src={imageUrl}
+        className="card-img-top"
+        alt={course.name}
+        style={{ objectFit: 'cover', height: '200px' }}
+      />
+      <div className="card-body d-flex flex-column">
+        <h5 className="card-title">{course.name}</h5>
+        <p className="card-text text-truncate mb-3" style={{ maxHeight: '3rem', overflow: 'hidden' }}>
+          {course.description}
+        </p>
+        <div className="mt-auto d-flex justify-content-between align-items-center">
+          <span className="h5 mb-0">${course.price}</span>
+          <Link
+            to={`/courses/${course.id}`}
+            className="btn btn-primary"
+          >
+            View Details
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+CourseCard.propTypes = {
+  course: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    image: PropTypes.string,
+  }).isRequired,
+};
+
+export default CourseCard;
