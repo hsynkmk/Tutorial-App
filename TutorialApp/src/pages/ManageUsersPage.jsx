@@ -87,7 +87,7 @@ const ManageUsersPage = () => {
         id: userId,
         fullName: editData.fullName,
         email: editData.email,
-        currentPassword: editData.currentPassword || '',
+        currentPassword: editData.password || '',
         newPassword: editData.newPassword || '',
       };
 
@@ -97,10 +97,17 @@ const ManageUsersPage = () => {
       fetchUsers();
     } catch (error) {
       console.error(error);
-      toast.error(error.response.data.Message || "Failed to update user");
+
+      if (error.response && error.response.data && error.response.data.errors) {
+        const errors = error.response.data.errors;
+        for (const [field, messages] of Object.entries(errors)) {
+          messages.forEach(message => toast.error(`${field}: ${message}`));
+        }
+      } else {
+        toast.error(error.response?.data?.message || "Failed to update user");
+      }
     }
   };
-
 
   const handleEditCancel = () => {
     setEditMode(null);
@@ -146,18 +153,28 @@ const ManageUsersPage = () => {
                 <td>
                   {editMode === user.id ? (
                     <>
-                      <input
-                        type="email"
-                        className="form-control mb-2"
-                        value={editData.email}
-                        onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                      />
-                      <input
-                        className="form-control"
-                        placeholder="New Password (optional)"
-                        value={editData.password}
-                        onChange={(e) => setEditData({ ...editData, password: e.target.value })}
-                      />
+                      <td>
+                        {editMode === user.id ? (
+                          <>
+                            <input
+                              type="email"
+                              className="form-control mb-2"
+                              value={editData.email}
+                              onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                            />
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="New Password (optional)"
+                              value={editData.newPassword || ''}
+                              onChange={(e) => setEditData({ ...editData, newPassword: e.target.value })}
+                            />
+                          </>
+                        ) : (
+                          user.email
+                        )}
+                      </td>
+
                     </>
                   ) : (
                     user.email
