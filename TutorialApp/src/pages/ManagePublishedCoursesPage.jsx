@@ -4,32 +4,36 @@ import { courseService } from '../services/api';
 import { toast } from 'react-toastify';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import LoadingSpinner from '../components/LoadingSpinner';
-import Pagination from '../components/Pagination'; // Assuming you already have this component
+import Pagination from '../components/Pagination';
 
 const ManagePublishedCoursesPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);  // Page number state
-  const [pageSize, setPageSize] = useState(10);     // Page size state
-  const [totalRecords, setTotalRecords] = useState(0); // Total records state
+  const [pagination, setPagination] = useState({
+    pageNumber: 1,
+    pageSize: 10,
+    totalRecords: 0,
+  });
 
   useEffect(() => {
     fetchCourses();
-  }, [pageNumber, pageSize]); // Fetch courses when pageNumber or pageSize changes
+  }, [pagination.pageNumber, pagination.pageSize]);
 
   const fetchCourses = async () => {
     try {
-      const response = await courseService.getEducatorCourses(pageNumber, pageSize); // Pass pageNumber and pageSize
+      const response = await courseService.getEducatorCourses(
+        pagination.pageNumber,
+        pagination.pageSize
+      );
       setCourses(response.data.data);
-      setTotalRecords(response.data.totalRecords); // Assuming the response includes totalRecords
-      if (response.data.data.length === 0) {
-        toast.error('No courses found');
-        return;
-      }
+      setPagination({
+        ...pagination,
+        totalRecords: response.data.totalRecords,
+      });
     } catch (err) {
       setError('Failed to load courses');
-      toast.error('Failed to load courses');
+      toast.error(err.response?.data?.Message || 'Failed to load courses');
     } finally {
       setLoading(false);
     }
@@ -43,14 +47,14 @@ const ManagePublishedCoursesPage = () => {
     try {
       await courseService.deleteCourse(courseId);
       toast.success('Course deleted successfully');
-      fetchCourses(); // Re-fetch the courses after deletion
+      fetchCourses();
     } catch (error) {
-      toast.error('Failed to delete course');
+      toast.error(error.response?.data?.Message || 'Failed to delete course');
     }
   };
 
   const handlePageChange = (newPageNumber) => {
-    setPageNumber(newPageNumber);
+    setPagination({ ...pagination, pageNumber: newPageNumber });
   };
 
   if (loading) return <LoadingSpinner />;
@@ -88,10 +92,7 @@ const ManagePublishedCoursesPage = () => {
                 <td>${course.price}</td>
                 <td>
                   <div className="btn-group">
-                    <Link
-                      to={`/courses/edit/${course.id}`}
-                      className="btn btn-sm btn-outline-primary"
-                    >
+                    <Link to={`/courses/edit/${course.id}`} className="btn btn-sm btn-outline-primary">
                       <FaEdit />
                     </Link>
                     <button
@@ -109,10 +110,10 @@ const ManagePublishedCoursesPage = () => {
       </div>
 
       <Pagination
-        currentPage={pageNumber}
-        totalRecords={totalRecords} // Pass totalRecords for pagination
-        pageSize={pageSize}
-        onPageChange={handlePageChange} // Pass the handler to change page
+        currentPage={pagination.pageNumber}
+        totalRecords={pagination.totalRecords}
+        pageSize={pagination.pageSize}
+        onPageChange={handlePageChange}
       />
     </div>
   );

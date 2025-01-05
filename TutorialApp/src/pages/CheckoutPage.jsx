@@ -51,7 +51,11 @@ const CheckoutPage = () => {
       clearCart();
       navigate('/profile');
     } catch (error) {
-      toast.error('Payment failed. Please try again.');
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.Message || 'Payment failed. Please try again.');
+      } else {
+        toast.error('Payment failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -169,4 +173,4 @@ const CheckoutPage = () => {
   );
 };
 
-export default CheckoutPage; 
+export default CheckoutPage;

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'https://localhost:7288/api'; // .NET Core API port
+// WARNING: SOME API URLs FOR FUTURE REFERENCE (NOT IMPLEMENTED)
+const API_URL = 'https://localhost:7288/api'; // API port
 
 const api = axios.create({
   baseURL: API_URL,
@@ -46,13 +47,17 @@ export const courseService = {
   createCourse: (courseData) => api.post('/courses', courseData),
   updateCourse: (id, courseData) => api.put(`/courses/${id}`, courseData),
   deleteCourse: (id) => api.delete(`/courses/${id}`),
-  getEducatorCourses: () => api.get('/courses/educator'),
+  getEducatorCourses: (pageNumber = 1, pageSize = 10) => {
+    return api.get('/courses/educator', {
+      params: { pageNumber, pageSize } 
+    });
+  },
 };
 
 export const orderService = {
   purchaseCourse: (courseId) => api.post('/orders', { courseId }),
   getUserOrders: () => api.get('/orders/user'),
-  getAllOrders: () => api.get('/orders'), // For educators
+  getAllOrders: () => api.get('/orders'),
 };
 
 export default api; 

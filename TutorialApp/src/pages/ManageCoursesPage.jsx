@@ -30,7 +30,7 @@ const ManageCoursesPage = () => {
       });
     } catch (err) {
       setError('Failed to load courses');
-      toast.error('Failed to load courses');
+      toast.error(error.response.data.Message || 'Failed to load courses');
     } finally {
       setLoading(false);
     }
@@ -46,7 +46,7 @@ const ManageCoursesPage = () => {
       toast.success('Course deleted successfully');
       fetchCourses();
     } catch (error) {
-      toast.error('Failed to delete course');
+      toast.error(error.response.data.Message || 'Failed to delete course');
     }
   };
 

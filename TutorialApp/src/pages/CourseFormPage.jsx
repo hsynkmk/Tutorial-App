@@ -12,7 +12,7 @@ const CourseFormPage = () => {
     name: '',
     description: '',
     price: '',
-    category: '', // Replace learningOutcomes with category
+    category: '',
   });
 
   useEffect(() => {
@@ -29,10 +29,10 @@ const CourseFormPage = () => {
         name: course.name,
         description: course.description,
         price: course.price.toString(),
-        category: course.category || '', // Handle category field
+        category: course.category || '',
       });
     } catch (error) {
-      toast.error('Failed to load course');
+      toast.error(error.response.data.Message || 'Failed to load course');
       navigate(-1);
     } finally {
       setLoading(false);

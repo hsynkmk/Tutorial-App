@@ -64,7 +64,7 @@ const HomePage = () => {
 
       <Pagination
         currentPage={pageNumber}
-        totalRecords={totalRecords} // Correct prop name here
+        totalRecords={totalRecords}
         pageSize={pageSize}
         onPageChange={handlePageChange}
       />

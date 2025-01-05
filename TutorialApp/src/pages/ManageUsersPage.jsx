@@ -37,7 +37,7 @@ const ManageUsersPage = () => {
       });
     } catch (err) {
       setError('Failed to load users');
-      toast.error('Failed to load users');
+      toast.error(error.response.data.Message || 'Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -53,7 +53,7 @@ const ManageUsersPage = () => {
       toast.success('User role updated successfully');
       fetchUsers();
     } catch (error) {
-      toast.error('Failed to update user role');
+      toast.error(error.response.data.Message || 'Failed to update user role');
     }
   };
 
@@ -67,7 +67,7 @@ const ManageUsersPage = () => {
       toast.success('User deleted successfully');
       fetchUsers();
     } catch (error) {
-      toast.error('Failed to delete user');
+      toast.error(error.response.data.Message || 'Failed to delete user');
     }
   };
 
@@ -97,7 +97,7 @@ const ManageUsersPage = () => {
       fetchUsers();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update user");
+      toast.error(error.response.data.Message || "Failed to update user");
     }
   };
 
