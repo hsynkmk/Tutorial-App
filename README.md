@@ -288,10 +288,17 @@ This is the frontend of the **TutorialApp**, a learning platform designed for us
    ```bash
    git clone https://github.com/hsynkmk/Tutorial-App.git
    cd Tutorial-App
-   cd Backend
+   cd Frontend
     ```
+2. Install dependencies:
+```bash
+npm install
+```
 
-
+3. Start the development server:
+```bash
+npm run dev
+```
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
