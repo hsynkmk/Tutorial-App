@@ -90,7 +90,15 @@ This is the frontend of the **TutorialApp**, a learning platform designed for us
    cd Tutorial-App
    cd Backend
     ```
+2. Install dependencies:
+```bash
+npm install
+```
 
+3. Start the development server:
+```bash
+npm run dev
+```
 
 ## License
 
