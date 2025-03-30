@@ -1,16 +1,24 @@
-# Backend Project
-
-Live App: https://hsynkmkstutorialapp.netlify.app/ <br><br>
-Educator: educator@gmail.com <br>
-Password: Educator1. <br>
-<br>
-Student: student@gmail.com <br>
-Password: Student1.
-
+# Tutorial App
 This repository contains a web application built with **ASP.NET Core** and **React** following the principles of **Clean Architecture**. The project is designed to be modular, scalable, and maintainable, utilizing various modern patterns and libraries. Below is a detailed overview of the technologies and approaches used in the project.
-
+### Initial Users:
+- <b>Educator:</b> educator@gmail.com <br>
+<b>Password:</b> Educator1. <br>
+- <b>Student:</b> Student: student@gmail.com <br>
+<b>Password:</b> Student1.
 ---
+## Screenshots
+![image](https://github.com/user-attachments/assets/e6dff2d2-bc2a-4386-87a1-7b4e1a6afcff)
+![image](https://github.com/user-attachments/assets/d56f7358-98f6-4e34-83e2-d48d50e38340)
+![image](https://github.com/user-attachments/assets/490d5c9b-ad8d-43eb-9126-aa5cf833e980)
+![image](https://github.com/user-attachments/assets/793add2c-1783-48d9-97b6-bc2b7d54b480)
+![image](https://github.com/user-attachments/assets/1d065626-a128-42d7-bb3b-0c4484f5d79c)
+![image](https://github.com/user-attachments/assets/e93e1142-e1dc-49db-9cff-3e4f8c1ff6bb)
+![image](https://github.com/user-attachments/assets/c2665885-a921-4968-8869-3b62ebc8696d)
+![image](https://github.com/user-attachments/assets/23688465-0ba3-427d-8dbf-752e522b5bb1)
+![image](https://github.com/user-attachments/assets/0ddc75cb-1e4a-4b43-bc56-76d93a28ce1d)
+![image](https://github.com/user-attachments/assets/26514c1f-79d9-4df7-a657-3ca257e85e2d)
 
+# Backend Project
 ## Features
 
 - **Clean Architecture**: Ensures a separation of concerns by organizing the code into layers: `Domain`, `Application`, `Infrastructure`, and `API`.
